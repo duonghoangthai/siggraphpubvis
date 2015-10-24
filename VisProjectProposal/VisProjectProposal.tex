@@ -26,7 +26,7 @@
 % Replace the text between curly brackets with your own
 
 \title{CS 6630 Project Proposal\\Visualizing SIGGRAPH Publications}
-\author{Kui, Wu and Hoang, Duong\\TODO (u0930062)\\TODO@TODO u0933062@utah.edu}
+\author{Kui, Wu and Hoang, Duong\\u0931640 and u0930062\\u0931640@utah.edu and u0933062@utah.edu}
 \date{\today}
 
 % You can leave out "date" and it will be added automatically for today
@@ -108,11 +108,11 @@ This whole paper view can be sorted either alphabetically or by citation count. 
     \label{fig:pop-up}
 \end{figure}
 
-\textbf{Institution view}. Here we show a map of all the institutions that have published papers to SIGGRAPH. They will appear as circles on a projected world map. The bigger the circle is, the more publications that institution has in the selected time period. Mousing over an institution will show its name and address.
+\textbf{Institution view}. Here we show a map of all the institutions that have published papers to SIGGRAPH. They will appear as circles on a projected world map. The bigger the circle is, the more publications that institution has in the selected time period. Mousing over an institution will show its name and address. We chose a map for this view because for an institution, the geographical information can be important, for example, to a prospective graduate student looking for a school to apply to. Displaying a large amount of items using circles is also space-conserving.
 
-\textbf{Author view}. In this view we show all paper authors and their collaboration relationships as a node-link diagram. Each author is a node, and two authors are linked if they have written a paper together. Bigger nodes represent more prolific authors, in terms of some metrics such as the H-index. Mousing over an author will show his/her name and affiliations.
+\textbf{Author view}. In this view we show all paper authors and their collaboration relationships as a node-link diagram. Each author is a node, and two authors are linked if they have written a paper together. Bigger nodes represent more prolific authors, in terms of some metrics such as the H-index. Mousing over an author will show his/her name and affiliations. The reason we chose a node-link diagram for this view is because it highlights quite nicely the clusters between subsets of nodes, and the view is dynamic so it is easier to put any author at the center (for example, when his paper is being selected).
 
-\textbf{Keyword view}. This view acts both as a view and a filter. Here we list all the keywords extracted from all the papers in alphabetical order. Keywords are selectable, and each time a keyword is clicked, the related keywords are highlighted. Moreover, selecting a set of keywords will reduce the amount of information shown in the other views, to retain only the papers/authors/institutions that are related to the selected set of keywords. Fig \ref{fig:click_keyword} shows an initial design of this idea, where the list of papers was not really filtered by simply highlighted and re-sorted. This feature can be very interesting because a glance at the paper view can tell us the popularity of the current selected set of keywords throughout the years.
+\textbf{Keyword view}. This view acts both as a view and a filter. Here we list all the keywords extracted from all the papers in alphabetical order. Keywords are selectable, and each time a keyword is clicked, the related keywords are highlighted. This feature is particularly useful when the user clicks on a topic keyword (for example: "global illumination"), and the related keywords show common techniques used to solve problems related to that topic (for example: "path tracing", "radiosity", "photon mapping" which are common methods in graphics to achieve "global illumination"). Two keywords are related if they appear together in many papers. Moreover, selecting a set of keywords will reduce the amount of information shown in the other views, to retain only the papers/authors/institutions that are related to the selected set of keywords. This is useful because the list of papers/authors/institutions can be quite large. Fig \ref{fig:click_keyword} shows an initial design of this idea, where the list of papers was not really filtered by simply highlighted and re-sorted. This feature can be very interesting because a glance at the paper view can tell us the popularity of the current selected set of keywords throughout the years.
 
 \begin{figure}[htb!]
     \centering
@@ -148,7 +148,7 @@ Finally, the paper view supports the use of a brush to limit the data in other v
     \label{fig:brush}
 \end{figure}
 
-\subsection{Alternative Design}
+\subsection{Alternative Designs}
 
 We thought about two other alternatives to represent the keyword list: a radial Reingold-Tilford Tree (\ref{fig:radial_tree}), and a zoomable multi-layer ring (\ref{fig:zoomable_ring}). These ideas are inspired by \href{http://bl.ocks.org/mbostock/4063550}{designs} we found on Mike Bostock's \href{http://bl.ocks.org/metmajer/5480307}{website}. We decided that these designs make it harder for users to read the keywords, and our keyword list is flat rather than a hierarchical and thus would be unsuitable for these hierarchical designs.
 
@@ -178,8 +178,12 @@ For the paper view, we thought about using lines to show citation relationship b
 \section{Features}
 \subsection{Must-Have Features}
 % Must-Have Features. List the features without which you would consider your project to be a failure.
+The paper, institution, and author views are must-have features. All the proposed interactions between these three views are essential and must be implemented.
 \subsection{Optional Features}
 % Optional Features. List the features which you consider to be nice to have, but not critical.
+Because it is considerably harder to extract meaningful keywords out of a paper, we will implement the keyword view and all related interactions last. In the event that it becomes too hard to do, this view will be left out of the design.
+
+The details pop-ups that appear when mousing over each paper will also be an optional feature as they do not affect the core usability and usefulness of the project.
 
 \section{Project Schedule}
 \input{schedule}
