@@ -38,7 +38,11 @@
 \section{Introduction and background}
 % Basic Info. The project title, your names, e-mail addresses, UIDs, a link to the project repository.
 % Background and Motivation. Discuss your motivations and reasons for choosing this project, especially any background or research interests that may have influenced your decision.
-When surveying a new field, researchers often want an overview look at the important papers in the field, how they are related, and how popular trends in topics or techniques have been evolving over the years. Traditional search engines such as Google Scholar and digital libraries such as the ACM's can alleviate the task, but only when the researcher has a good idea of what he should look for. Even then, the information obtained from those tools at any given moment is not only too specific but also presented in a non-visual form, making it difficult for the user to see a bigger picture. Being both interested in doing research in computer graphics, in this project we aim to develop a tool to visualize connections between papers published over the years in SIGGRAPH, the most important conference in computer graphics. The tool should show in one place: the citation relationships among SIGGRAPH papers, important papers in each sub-field, prolific authors and their collaboration patterns, popular topics and methods in recent years, and active research institutions in each sub-field. It is our hope that such a tool can be particularly helpful to someone who wants to survey a field and summarize major results. It could also help new researchers in finding not only interesting problems to work on but also pointers to relevant publications for reference. Lastly, prospective graduate students can use information provided by the tool to make more informed decision in their application process.
+When surveying a new field, researchers often want an overview look at the important papers in the field, how they are related, and how popular trends in topics or techniques have been evolving over the years. Traditional search engines such as Google Scholar and digital libraries such as the ACM's can alleviate the task, but only when the researcher has a good idea of what he should look for. Even then, the information obtained from those tools at any given moment is not only too specific but also presented in a non-visual form, making it difficult for the user to see a bigger picture.
+
+Being both interested in doing research in computer graphics, in this project we aim to develop a tool to visualize connections between papers published over the years in SIGGRAPH, the most important conference in computer graphics. The tool should show in one place: the citation relationships among SIGGRAPH papers, important papers in each sub-field, prolific authors and their collaboration patterns, popular topics and methods in recent years, and active research institutions in each sub-field. It is our hope that such a tool can be particularly helpful to someone who wants to survey a field and summarize major results. It could also help new researchers in finding not only interesting problems to work on but also pointers to relevant publications for reference. Lastly, prospective graduate students can use information provided by the tool to make more informed decision in their application process.
+
+When searching for project ideas, we stumbled upon Autodesk's \href{http://www.autodeskresearch.com/projects/citeology}{Citeology} and this work gives us motivations to propose the current project.
 
 \section{Project Objectives}
 % Project Objectives. Provide the primary questions you are trying to answer with your visualization. What would you like to learn and accomplish? List the benefits.
@@ -75,28 +79,31 @@ Since our data is highly relational, we plan to store it in an SQL database and 
 An alternative design is to flatten all the SQL tables into JSON files and load those instead. The SQL approach allows us to not having to load everything into memory at once, perhaps at the cost of more processing time each time users change their query/filter of the data. It is not yet clear to us how big the data will be, and which one of the two approaches will work better.
 
 \section{Visualization Design}
+\subsection{Proposed Design}
 % Visualization Design. How will you display your data? Provide some general ideas that you have for the visualization design. Develop three alternative prototype designs for your visualization. Create one final design that incorporates the best of your three designs. Describe your designs and justify your choices of visual encodings. We recommend you use the Five Design Sheet Methodology.
 Our design will consist of four different views (Fig. \ref*{fig:overview}):
 
 \begin{figure}[htb!]
     \centering
-    \includegraphics[width=\paperwidth]{visproposalDrawing_page_Part_1.pdf}
+    \includegraphics[width=160mm]{visproposalDrawing_page_Part_1.pdf}
     \caption{Overview}
     \label{fig:overview}
 \end{figure}
 
-\textbf{Paper view (the main view)}. Here we show all the papers, grouped by year. Each year occupies one column. This view will be wide enough to show about ten years but will be scrollable horizontally to move the focus to a different period of time. Each paper's title will appear on one row and be click-able. When a paper is clicked on, the papers that this paper cites and the ones that cite it will be highlighted (Fig. \ref{fig:paper_view}). Moreover, when a paper is moused over, a pop-up will show the paper's full title, author lists, keywords, and DOI link (Fig. \ref{fig:pop-up}). A bar will appear right under each paper's title, the length of which is proportional to the paper's number of citations (this is not yet shown in our design sketches). This help the user identify influential papers at a glance. The whole view can be sorted either alphabetically or by citation count. The papers can also be filtered by citation count, to hide papers with lesser impacts.
+\textbf{Paper view (the main view)}. Here we show all the papers, grouped by year. Each year occupies one column. This view will be wide enough to show about ten years but will be scrollable horizontally to move the focus to a different period of time. Each paper's title will appear on one row and be click-able. When a paper is clicked on, the papers that this paper cites and the ones that cite it will be highlighted (Fig. \ref{fig:paper_view}). Moreover, when a paper is moused over, a pop-up will show the paper's full title, author lists, keywords, and DOI link (Fig. \ref{fig:pop-up}). A bar will appear right under each paper's title, the length of which is proportional to the paper's number of citations (this is not yet shown in our design sketches). This help the user identify influential papers at a glance.
+
+This whole paper view can be sorted either alphabetically or by citation count. The papers can also be filtered by citation count, to hide papers with lesser impacts. We provide two checkboxes and a slider for these purposes.
 
 \begin{figure}[htb!]
     \centering
-    \includegraphics[width=\paperwidth]{visproposalDrawing_page_Part_2.pdf}
+    \includegraphics[width=160mm]{visproposalDrawing_page_Part_2.pdf}
     \caption{Paper view}
     \label{fig:paper_view}
 \end{figure}
 
 \begin{figure}[htb!]
     \centering
-    \includegraphics[width=\paperwidth]{visproposalDrawing_page_Part_8.pdf}
+    \includegraphics[width=160mm]{visproposalDrawing_page_Part_8.pdf}
     \caption{Paper details pop-up}
     \label{fig:pop-up}
 \end{figure}
@@ -105,9 +112,68 @@ Our design will consist of four different views (Fig. \ref*{fig:overview}):
 
 \textbf{Author view}. In this view we show all paper authors and their collaboration relationships as a node-link diagram. Each author is a node, and two authors are linked if they have written a paper together. Bigger nodes represent more prolific authors, in terms of some metrics such as the H-index. Mousing over an author will show his/her name and affiliations.
 
-\textbf{Keyword view}. 
+\textbf{Keyword view}. This view acts both as a view and a filter. Here we list all the keywords extracted from all the papers in alphabetical order. Keywords are selectable, and each time a keyword is clicked, the related keywords are highlighted. Moreover, selecting a set of keywords will reduce the amount of information shown in the other views, to retain only the papers/authors/institutions that are related to the selected set of keywords. Fig \ref{fig:click_keyword} shows an initial design of this idea, where the list of papers was not really filtered by simply highlighted and re-sorted. This feature can be very interesting because a glance at the paper view can tell us the popularity of the current selected set of keywords throughout the years.
 
-\textbf{Interaction between views}.
+\begin{figure}[htb!]
+    \centering
+    \includegraphics[width=160mm]{visproposalDrawing_page_Part_4.pdf}
+    \caption{Keyword filtering}
+    \label{fig:click_keyword}
+\end{figure}
+
+\textbf{Interaction between views}. In the previous section we described what happens to the other three views when a keyword is selected. All the elements in the first three views can be clicked on as well. When a paper is clicked on, the corresponding authors will be highlighted and brought to the center of the view, and the corresponding institutions will also be highlighted. We will also highlight the selected paper's keywords. See Fig. \ref*{fig:select_paper} for an illustration of this.
+
+\begin{figure}[htb!]
+    \centering
+    \includegraphics[width=160mm]{visproposalDrawing_page_Part_3.pdf}
+    \caption{Select a paper}
+    \label{fig:select_paper}
+\end{figure}
+
+Similarly, an institution or an author can be clicked on, and corresponding papers and keywords will be highlighted as well (See Fig. \ref{fig:select_author}).
+
+\begin{figure}[htb!]
+    \centering
+    \includegraphics[width=160mm]{visproposalDrawing_page_Part_5.pdf}
+    \caption{Select an author}
+    \label{fig:select_author}
+\end{figure}
+
+Finally, the paper view supports the use of a brush to limit the data in other views to a particular period of time (see Fig. \ref{fig:brush}).
+
+\begin{figure}[htb!]
+    \centering
+    \includegraphics[width=160mm]{visproposalDrawing_page_Part_7.pdf}
+    \caption{Brush in paper view}
+    \label{fig:brush}
+\end{figure}
+
+\subsection{Alternative Design}
+
+We thought about two other alternatives to represent the keyword list: a radial Reingold-Tilford Tree (\ref{fig:radial_tree}), and a zoomable multi-layer ring (\ref{fig:zoomable_ring}). These ideas are inspired by \href{http://bl.ocks.org/mbostock/4063550}{designs} we found on Mike Bostock's \href{http://bl.ocks.org/metmajer/5480307}{website}. We decided that these designs make it harder for users to read the keywords, and our keyword list is flat rather than a hierarchical and thus would be unsuitable for these hierarchical designs.
+
+\begin{figure}[htb!]
+    \centering
+    \includegraphics[width=160mm]{visproposalDrawing_page_Part_9.pdf}
+    \caption{Radial Reingold-Tilford Tree for keywords}
+    \label{fig:radial_tree}
+\end{figure}
+
+\begin{figure}[htb!]
+    \centering
+    \includegraphics[width=160mm]{visproposalDrawing_page_Part_10.pdf}
+    \caption{Zoomable rings for keywords}
+    \label{fig:zoomable_ring}
+\end{figure}
+
+For the paper view, we thought about using lines to show citation relationship between papers. However these lines would block underlying papers, and feel redundant because we can encode the citation relationship no less effectively using less "ink" in our proposed design.
+
+\begin{figure}[htb!]
+    \centering
+    \includegraphics[width=160mm]{visproposalDrawing_page_Part_11.pdf}
+    \caption{Arrow links between papers}
+    \label{fig:zoomable_ring}
+\end{figure}
 
 \section{Features}
 \subsection{Must-Have Features}
