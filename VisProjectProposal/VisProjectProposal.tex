@@ -78,7 +78,7 @@ An alternative design is to flatten all the SQL tables into JSON files and load 
 % Visualization Design. How will you display your data? Provide some general ideas that you have for the visualization design. Develop three alternative prototype designs for your visualization. Create one final design that incorporates the best of your three designs. Describe your designs and justify your choices of visual encodings. We recommend you use the Five Design Sheet Methodology.
 Our design will consist of four different views (Fig. \ref*{fig:overview}):
 
-\begin{figure}[ht!]
+\begin{figure}[htb!]
     \centering
     \includegraphics[width=\paperwidth]{visproposalDrawing_page_Part_1.pdf}
     \caption{Overview}
@@ -87,14 +87,14 @@ Our design will consist of four different views (Fig. \ref*{fig:overview}):
 
 \textbf{Paper view (the main view)}. Here we show all the papers, grouped by year. Each year occupies one column. This view will be wide enough to show about ten years but will be scrollable horizontally to move the focus to a different period of time. Each paper's title will appear on one row and be click-able. When a paper is clicked on, the papers that this paper cites and the ones that cite it will be highlighted (Fig. \ref{fig:paper_view}). Moreover, when a paper is moused over, a pop-up will show the paper's full title, author lists, keywords, and DOI link (Fig. \ref{fig:pop-up}). A bar will appear right under each paper's title, the length of which is proportional to the paper's number of citations (this is not yet shown in our design sketches). This help the user identify influential papers at a glance. The whole view can be sorted either alphabetically or by citation count. The papers can also be filtered by citation count, to hide papers with lesser impacts.
 
-\begin{figure}[ht!]
+\begin{figure}[htb!]
     \centering
     \includegraphics[width=\paperwidth]{visproposalDrawing_page_Part_2.pdf}
     \caption{Paper view}
     \label{fig:paper_view}
 \end{figure}
 
-\begin{figure}[ht!]
+\begin{figure}[htb!]
     \centering
     \includegraphics[width=\paperwidth]{visproposalDrawing_page_Part_8.pdf}
     \caption{Paper details pop-up}
