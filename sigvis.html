@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Siggraph Visualization</title>
+    <style>
+        #links > line {
+            stroke: rgb(216, 216, 216);
+        }
+        
+        #xAxis path,
+        #yAxis path {
+            fill: none;
+            stroke: black;
+        }
+
+        #yAxis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+            /*stroke-dasharray: 2,2;*/
+        }
+        
+        /* Styles that clean up the layout;
+         * you can ignore these: */
+        
+        h2 {
+            margin: 10px;
+        }
+        
+        div {
+            display: inline-block;
+            border: 1px solid lightgray;
+            margin: 10px;
+        }
+        
+        div,
+        span {
+            padding: 10px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
+</head>
+
+<body>
+    <h3>Siggraph Visualization</h3>
+
+    <br/>
+    <hr/>
+
+    <span id="info"></span>
+    <br/>
+
+    <div>
+        <h2>Paper Views</h2>
+        <!-- cite: http://dataviscourse.net/2015/lectures/lecture-d3-layouts-maps/-->
+        <svg width="900" height="500">
+        </svg>
+    </div>
+
+    <script type="application/javascript" src="script.js"></script>
+</body>
+</html>
