@@ -39,6 +39,16 @@
         span {
             padding: 10px;
         }
+
+        .viewport {
+            position: absolute;
+            top: 113px;
+            left: 979px;
+            overflow-y: auto;
+            width: 300px;
+            height: 404px;
+        }
+
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
@@ -52,10 +62,10 @@
 
     <span id="info"></span>
     <br/>
-
+    <div class="viewport"></div>
     <div>
-        <h2>Paper View</h2>
-        <svg id="pView" width="2048" height="2200">
+        <svg id="pView" width="950" height="400">
+            <g id="yearBoundingBox"></g>
             <g id="axis"></g>
             <g id="b2002"></g>
             <g id="b2003"></g>
@@ -71,9 +81,14 @@
             <g id="b2013"></g>
             <g id="b2014"></g>
             <g id="b2015"></g>
+            <g id="b2015"></g>
+            <g id="papersPort"></g>
+
         </svg>
     </div>
 
     <script type="application/javascript" src="script.js"></script>
+    <script type="application/javascript" src="fisheye.js"></script>
+    <script type="application/javascript" src="virtualscroller.js"></script>
 </body>
 </html>
