@@ -40,6 +40,7 @@ for dir in next(os.walk(work_dir))[1]:
                 paper.title = article.find('title').text
                 paper.authors = [x.text for x in article.findall('author')]
                 paper.year = article.find('year').text
+                paper.link = article.find('ee').text
                 all_papers[normalize_title(paper.title)] = paper
         except Exception as e:
             print ('Exception in file ' + file)
