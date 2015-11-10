@@ -1,0 +1,8 @@
+Use "Nuance PDF Power Advanced" to convert pdf to rtf using OCR
+Use "Convert RTF to Unicode TXT" to convert rtf to Unicode text files
+Use convertToUtf8.py to re-encode txt files to UTF-8
+Use extractHeaders.py to extract the headers from the txt files
+Use referenceExtract.py to extract the references from the txt files
+Read from the XML and the title and references for each year
+Output one JSON file for each paper
+Remove papers that are not in SIGGRAPH (papers in the reference list that can't be found in the XML)

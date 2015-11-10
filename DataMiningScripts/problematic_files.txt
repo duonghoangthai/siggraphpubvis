@@ -1,0 +1,7 @@
+some problematic files (the list is not complete)
+p729-lamorlette.pdf
+p785-benson.pdf
+p681-perlin.pdf
+p567-duguet.pdf
+p582-james.pdf
+p630-chen.pdf
