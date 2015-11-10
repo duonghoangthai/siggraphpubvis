@@ -9,7 +9,7 @@ var paperData,
     citedBy;
 
 function getCitations() {
-    var paperList = getPapers(paperData)[currentYear];
+    var paperList = paperData[currentYear];
     for (var i = 0; i < paperList.length; i++)
         if (paperList[i].title === selectedPaper[0][0].__data__) {
             references = paperList[i].references;
@@ -18,13 +18,6 @@ function getCitations() {
     //console.log(paperList[i]);
     //console.log(references);
     //console.log(citedBy);
-}
-
-/**
- * @param {{papers:string}} data
- */
-function getPapers(data){
-    return data.papers;
 }
 
 function changeSelection() {
@@ -71,8 +64,7 @@ function updateYearBar() {
     var fontSize = 1;
     var length = 0;
     var year;
-    var papers = getPapers(paperData);
-    for (year in papers) {
+    for (year in paperData) {
         length++;
     }
     var dWidth = xAxisWidth / (length + 2);
@@ -82,8 +74,8 @@ function updateYearBar() {
     dateList.push("");
     dateRange.push(0);
     var i = 1;
-    for (year in papers) {
-        if (papers.hasOwnProperty(year)) {
+    for (year in paperData) {
+        if (paperData.hasOwnProperty(year)) {
             dateList.push(year);
             dateRange.push(dWidth * i);
             i++;
@@ -141,12 +133,12 @@ function updateYearBar() {
     var selection;
     var j = 0;
     for (year = 2015; year > 2001; year--) {
-        if (papers.hasOwnProperty(year)) {
+        if (paperData.hasOwnProperty(year)) {
             (function () {
                 var xOffset = 13 - j;
                 barId = "#b" + year;
                 //var titleList = [];
-                var paperList = getPapers(paperData)[year];
+                var paperList = paperData[year];
                 //for (var i = 0; i < paperList.length; i++)
                 //    titleList.push(paperList[i].title);
                 //
@@ -291,7 +283,7 @@ function updatePaperBar() {
     var titleList = [];
     var paperList = [];
     if (selectedYear) {
-        paperList = getPapers(paperData)[selectedYear];
+        paperList = paperData[selectedYear];
         for (var i = 0; i < paperList.length; i++)
             titleList.push(paperList[i].title);
         titleList.sort();
@@ -391,7 +383,6 @@ function updatePaperBar() {
 d3.json("Data/all_papers.json", function (error, loadedData) {
     if (error) throw error;
     paperData = loadedData;
-    console.log(paperData);
     updateYearBar();
     //updatePaperBar();
 });
