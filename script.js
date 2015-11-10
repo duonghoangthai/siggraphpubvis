@@ -4,7 +4,21 @@
 var paperData,
     selectedYear,
     currentYear,
-    selectedPaper;
+    selectedPaper,
+    references,
+    citedBy;
+
+function getCitations() {
+    var paperList = getPapers(paperData)[currentYear];
+    for (var i = 0; i < paperList.length; i++)
+        if (paperList[i].title === selectedPaper[0][0].__data__) {
+            references = paperList[i].references;
+            citedBy = paperList[i].cited_by;
+        }
+    //console.log(paperList[i]);
+    //console.log(references);
+    //console.log(citedBy);
+}
 
 /**
  * @param {{papers:string}} data
@@ -131,25 +145,25 @@ function updateYearBar() {
             (function () {
                 var xOffset = 13 - j;
                 barId = "#b" + year;
-                var titleList = [];
+                //var titleList = [];
                 var paperList = getPapers(paperData)[year];
-                for (var i = 0; i < paperList.length; i++)
-                    titleList.push(paperList[i].title);
-
-                titleList.sort();
+                //for (var i = 0; i < paperList.length; i++)
+                //    titleList.push(paperList[i].title);
+                //
+                //titleList.sort();
 
                 selection = d3.select(barId)
                     .selectAll("text")
-                    .data(titleList);
+                    .data(paperList);
 
                 selection.enter().append("text")
                     .text(function (d) {
-                        if (d.length < 50) return d;
-                        else return d.substring(0, 47) + '...';
+                        if (d.title.length < 50) return d;
+                        else return d.title.substring(0, 47) + '...';
                     })
                     .attr("font-size", function (d) {
                         if (selectedPaper) {
-                            if (d == selectedPaper[0][0].__data__)
+                            if (d.title == selectedPaper[0][0].__data__)
                                 return (fontSize + 1) + "px";
                             else return fontSize + "px";
                         } else {
@@ -162,9 +176,10 @@ function updateYearBar() {
                     })
                     .attr("fill", function (d) {
                         if (selectedPaper) {
-                            if (d == selectedPaper[0][0].__data__)
-                                return 'black';
-                            else return 'lightgrey';
+                            if (d.title == selectedPaper[0][0].__data__) return 'black';
+                            if (references.indexOf(d.id) > -1) return 'red';
+                            if (citedBy.indexOf(d.id) > -1) return 'blue';
+                            return 'lightgrey';
                         } else {
                             return 'black';
                         }
@@ -186,24 +201,44 @@ function updateYearBar() {
                     .duration(500)
                     .style("fill", function (d) {
                         if (selectedPaper) {
-                            if (d == selectedPaper[0][0].__data__)
-                                return 'black';
-                            else return 'lightgrey';
+                            if (d.title == selectedPaper[0][0].__data__) return 'black';
+                            if (references.indexOf(d.id) > -1) return 'red';
+                            if (citedBy.indexOf(d.id) > -1) return 'blue';
+                            return 'lightgrey';
                         } else {
                             return 'black';
                         }
                     })
                     .attr("font-size", function (d) {
                         if (selectedPaper) {
-                            if (d == selectedPaper[0][0].__data__)
-                                return (fontSize + 1) + "px";
+                            if (d.title == selectedPaper[0][0].__data__ ||
+                                references.indexOf(d.id) > -1 ||
+                                citedBy.indexOf(d.id) > -1)
+                                return (fontSize + 10) + "px";
                             else return fontSize + "px";
                         } else {
                             return fontSize + "px";
                         }
                     })
+                    .attr("transform", function (d, i) {
+                        if (selectedPaper) {
+                            if (d.title == selectedPaper[0][0].__data__ ||
+                                references.indexOf(d.id) > -1 ||
+                                citedBy.indexOf(d.id) > -1)
+                                return "translate(" + ((xOffset + 1) * dWidth - 15) + ","
+                                    + (titleBegin - 0.5 * fontSize - (paperList.length - i) * (fontSize + 0.5)) + ")"
+                                    //+ "rotate(-45)"
+                                    ;
+                            else
+                                return "translate(" + ((xOffset + 1) * dWidth - 15) + ","
+                                    + (titleBegin - 0.5 * fontSize - (paperList.length - i) * (fontSize + 0.5)) + ")"
+                        } else {
+                            return "translate(" + ((xOffset + 1) * dWidth - 15) + ","
+                                + (titleBegin - 0.5 * fontSize - (paperList.length - i) * (fontSize + 0.5)) + ")"
+                        }
+                    })
                     .text(function (d) {
-                        return d;
+                        return d.title;
                     })
                 ;
 
@@ -251,14 +286,13 @@ function updatePaperBar() {
         currentYear = selectedYear;
     } else {
         predefine = d3.select(".viewport").node().scrollTop;
-        console.log("here"+d3.select(".viewport").node().scrollTop);
     }
 
     var titleList = [];
     var paperList = [];
     if (selectedYear) {
         paperList = getPapers(paperData)[selectedYear];
-        for (i = 0; i < paperList.length; i++)
+        for (var i = 0; i < paperList.length; i++)
             titleList.push(paperList[i].title);
         titleList.sort();
     }
@@ -321,9 +355,9 @@ function updatePaperBar() {
             })
             .on("click", function () {
                 selectedPaper = d3.select(this);
+                getCitations();
                 changeSelection();
             });
-        ;
     };
 
     var rowExit = function (rowSelection) {
@@ -354,9 +388,10 @@ function updatePaperBar() {
 // above this is just function definitions
 // (nothing actually happens)
 
-d3.json("Data/papers.json", function (error, loadedData) {
+d3.json("Data/all_papers.json", function (error, loadedData) {
     if (error) throw error;
     paperData = loadedData;
+    console.log(paperData);
     updateYearBar();
     //updatePaperBar();
 });
