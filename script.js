@@ -6,18 +6,59 @@ var paperData,
     currentYear,
     selectedPaper,
     references,
-    citedBy;
+    citedBy,
+    maxPaperCitations,
+    maxPaperCitedAndCitations
+    ;
+
+function getMaxCitations() {
+    maxPaperCitations = [];
+    maxPaperCitedAndCitations = [];
+    for (var year = 2002; year < 2016; year++) {
+        if (paperData.hasOwnProperty(year)) {
+            (function () {
+                var maxCitation = 0;
+                var i;
+                for (i = 0; i < paperData[year].length; i++)
+                    //console.log(paperData[year][i].cited_by.length)
+                    maxCitation = Math.max(maxCitation, paperData[year][i].cited_by.length);
+                maxPaperCitations.push(maxCitation);
+
+                var maxCitedAndCitation = 0;
+                for (i = 0; i < paperData[year].length; i++) {
+                    var sum = paperData[year][i].cited_by.length + paperData[year][i].references.length;
+                    //console.log(sum);
+                    maxCitedAndCitation = Math.max(maxCitedAndCitation, sum);
+                }
+
+                maxPaperCitedAndCitations.push(maxCitedAndCitation);
+                //console.log(maxCitedAndCitation);
+                //console.log(maxCitation);
+            })();
+        }
+    }
+
+    //for (year = 2002; year < 2016; year++) {
+    //    console.log(year+" "+maxPaperCitations[year-2002]);
+    //}
+    //console.log(maxPaperCitations);
+    //console.log(maxPaperCitedAndCitations);
+}
 
 function getCitations() {
-    var paperList = paperData[currentYear];
-    for (var i = 0; i < paperList.length; i++)
-        if (paperList[i].title === selectedPaper[0][0].__data__) {
-            references = paperList[i].references;
-            citedBy = paperList[i].cited_by;
-        }
-    //console.log(paperList[i]);
+    //console.log(selectedPaper[0][0].__data__);
+    //var paperList = paperData[currentYear];
+    //for (var i = 0; i < paperList.length; i++)
+    //    if (paperList[i].title === selectedPaper[0][0].__data__.title) {
+    //        references = paperList[i].references;
+    //        citedBy = paperList[i].cited_by;
+    //
+    //    }
+    references = selectedPaper[0][0].__data__.references;
+    citedBy = selectedPaper[0][0].__data__.cited_by;
     //console.log(references);
     //console.log(citedBy);
+    //console.log(selectedPaper[0][0].__data__.title);
 }
 
 function changeSelection() {
@@ -52,6 +93,8 @@ function updateYearBar() {
      });
      */
 
+    //sortPapers();
+
     console.log("updatePaperBars");
     d3.select("#pView").on("click", function () {
         selectedPaper = null;
@@ -60,7 +103,7 @@ function updateYearBar() {
     });
     // Draw axis
     var xAxisWidth = 1024;
-    var titleBegin = 370;
+    var titleBegin = 470;
     var fontSize = 1;
     var length = 0;
     var year;
@@ -96,7 +139,7 @@ function updateYearBar() {
     d3.select("#axis").append("g")
         .call(dAxis)
         .attr("transform", function () {
-            return "translate(0," + titleBegin + ")"
+            return "translate(-40," + titleBegin + ")"
         });
 
     // Draw bounding box
@@ -108,11 +151,11 @@ function updateYearBar() {
 
     yBBox.enter().append("rect")
         .attr("x", function (d, i) {
-            return (i + 1) * dWidth - 15;
+            return (i + 1) * dWidth - 15 - 40;
         })
         .attr("y", 0)
         .attr("width", dWidth - 15)
-        .attr("height", 370)
+        .attr("height", titleBegin)
         .attr("fill", "white")
         .on("click", function (d) {
             selectedYear = d;
@@ -132,6 +175,21 @@ function updateYearBar() {
     var barId;
     var selection;
     var j = 0;
+    var highlight_PaperIdx = 0;
+    if (selectedPaper) {
+        var highlight_PaperTotal = selectedPaper[0][0].__data__.cited_by.length +
+            selectedPaper[0][0].__data__.references.length+1;
+        //var yOffset = titleBegin/highlight_PaperTotal;
+    } else {
+        var highlight_PaperTotal = 0;
+        //var yOffset = 0;
+    }
+
+    var yWidth = 470/52;
+    var yOffset = (titleBegin- yWidth*highlight_PaperTotal)*0.5;
+
+    //console.log(highlight_PaperTotal);
+
     for (year = 2015; year > 2001; year--) {
         if (paperData.hasOwnProperty(year)) {
             (function () {
@@ -155,7 +213,7 @@ function updateYearBar() {
                     })
                     .attr("font-size", function (d) {
                         if (selectedPaper) {
-                            if (d.title == selectedPaper[0][0].__data__)
+                            if (d.title == selectedPaper[0][0].__data__.title)
                                 return (fontSize + 1) + "px";
                             else return fontSize + "px";
                         } else {
@@ -163,12 +221,12 @@ function updateYearBar() {
                         }
                     })
                     .attr("transform", function (d, i) {
-                        return "translate(" + ((xOffset + 1) * dWidth - 15) + ","
+                        return "translate(" + ((xOffset + 1) * dWidth - 15 - 40) + ","
                             + (titleBegin - 0.5 * fontSize - (paperList.length - i) * (fontSize + 0.5)) + ")"
                     })
                     .attr("fill", function (d) {
                         if (selectedPaper) {
-                            if (d.title == selectedPaper[0][0].__data__) return 'black';
+                            if (d.title === selectedPaper[0][0].__data__.title) return 'black';
                             if (references.indexOf(d.id) > -1) return 'red';
                             if (citedBy.indexOf(d.id) > -1) return 'blue';
                             return 'lightgrey';
@@ -193,7 +251,7 @@ function updateYearBar() {
                     .duration(500)
                     .style("fill", function (d) {
                         if (selectedPaper) {
-                            if (d.title == selectedPaper[0][0].__data__) return 'black';
+                            if (d.title === selectedPaper[0][0].__data__.title) return 'black';
                             if (references.indexOf(d.id) > -1) return 'red';
                             if (citedBy.indexOf(d.id) > -1) return 'blue';
                             return 'lightgrey';
@@ -203,10 +261,10 @@ function updateYearBar() {
                     })
                     .attr("font-size", function (d) {
                         if (selectedPaper) {
-                            if (d.title == selectedPaper[0][0].__data__ ||
+                            if (d.title == selectedPaper[0][0].__data__.title ||
                                 references.indexOf(d.id) > -1 ||
                                 citedBy.indexOf(d.id) > -1)
-                                return (fontSize + 10) + "px";
+                                return (fontSize + 8) + "px";
                             else return fontSize + "px";
                         } else {
                             return fontSize + "px";
@@ -214,18 +272,23 @@ function updateYearBar() {
                     })
                     .attr("transform", function (d, i) {
                         if (selectedPaper) {
-                            if (d.title == selectedPaper[0][0].__data__ ||
+                            if (d.title == selectedPaper[0][0].__data__.title ||
                                 references.indexOf(d.id) > -1 ||
-                                citedBy.indexOf(d.id) > -1)
-                                return "translate(" + ((xOffset + 1) * dWidth - 15) + ","
-                                    + (titleBegin - 0.5 * fontSize - (paperList.length - i) * (fontSize + 0.5)) + ")"
-                                    //+ "rotate(-45)"
-                                    ;
-                            else
-                                return "translate(" + ((xOffset + 1) * dWidth - 15) + ","
+                                citedBy.indexOf(d.id) > -1) {
+                                highlight_PaperIdx = highlight_PaperIdx + 1;
+                                return "translate(" + ((xOffset + 1) * dWidth - 15 - 40) + ","
+                                    + (titleBegin - ((highlight_PaperIdx-1) * yWidth + yOffset)  + ")"
+                                    //+ "rotate(-45)")
+                                    );
+                                //return "translate(" + ((xOffset + 1) * dWidth - 15) + ","
+                                //    + (titleBegin - 0.5 * fontSize - (paperList.length - i) * (fontSize + 0.5)) + ")"
+                                //+ "rotate(-45)"
+                                //;
+                            } else
+                                return "translate(" + ((xOffset + 1) * dWidth - 15 - 40) + ","
                                     + (titleBegin - 0.5 * fontSize - (paperList.length - i) * (fontSize + 0.5)) + ")"
                         } else {
-                            return "translate(" + ((xOffset + 1) * dWidth - 15) + ","
+                            return "translate(" + ((xOffset + 1) * dWidth - 15 - 40) + ","
                                 + (titleBegin - 0.5 * fontSize - (paperList.length - i) * (fontSize + 0.5)) + ")"
                         }
                     })
@@ -272,6 +335,10 @@ function updatePaperBar() {
         ;
     */
 
+    var citationScale = d3.scale.linear()
+        .domain([0, maxPaperCitations[selectedYear-2002]])
+        .range([0, 200]);
+
     //console.log(d3.select(".viewport").node().scrollTop);
     var predefine = 0;
     if (currentYear != selectedYear) {
@@ -280,14 +347,14 @@ function updatePaperBar() {
         predefine = d3.select(".viewport").node().scrollTop;
     }
 
-    var titleList = [];
-    var paperList = [];
-    if (selectedYear) {
-        paperList = paperData[selectedYear];
-        for (var i = 0; i < paperList.length; i++)
-            titleList.push(paperList[i].title);
-        titleList.sort();
-    }
+    //var titleList = [];
+    //var paperList = [];
+    //if (selectedYear) {
+    //    paperList = paperData[selectedYear];
+    //    for (var i = 0; i < paperList.length; i++)
+    //        titleList.push(paperList[i].title);
+    //    titleList.sort();
+    //}
 
     d3.select(".viewport").select("svg").remove();
 
@@ -301,18 +368,19 @@ function updatePaperBar() {
         .attr("fill", "black");
 
     var rowEnter = function (rowSelection) {
-        //rowSelection.append("rect")
-        //    .attr("rx", 3)
-        //    .attr("ry", 3)
-        //    .attr("width", "300")
-        //    .attr("height", "20")
-        //;
+        rowSelection.append("rect")
+            .attr("y", 15)
+            //.attr("width", "300")
+            .attr("width", function(d){return citationScale(d.cited_by.length)})
+            .attr("height", "3")
+            .attr("fill", "orange")
+        ;
 
         rowSelection.append("text")
             .attr("transform", "translate(0,15)")
             .style("fill", function (d) {
                 if (selectedPaper) {
-                    if (d == selectedPaper[0][0].__data__)
+                    if (d.title == selectedPaper[0][0].__data__.title)
                         return 'black';
                     else return 'lightgrey';
                 } else {
@@ -322,23 +390,27 @@ function updatePaperBar() {
 
     };
     var rowUpdate = function (rowSelection) {
-        //rowSelection.select("rect")
-        //    .attr("fill", function (d) {
-        //        if (selectedPaper) {
-        //            if (d == selectedPaper[0][0].__data__)
-        //                return "orange";
-        //            else return "none";
-        //        } else {
-        //            return "none";
-        //        }
-        //    });
+        rowSelection.select("rect")
+            .attr("width", function(d){
+                //console.log(d.cited_by.length);
+                return citationScale(d.cited_by.length);
+            })
+            .attr("fill", function (d) {
+                if (selectedPaper) {
+                    if (d.title == selectedPaper[0][0].__data__.title)
+                        return "orange";
+                    else return "lightgrey";
+                } else {
+                    return "orange";
+                }
+            });
 
 
         rowSelection.select("text")
-            .text(function (d) {return d;})
+            .text(function (d) {return d.title;})
             .style("fill", function (d) {
                 if (selectedPaper) {
-                    if (d == selectedPaper[0][0].__data__)
+                    if (d.title == selectedPaper[0][0].__data__.title)
                         return 'black';
                     else return 'lightgrey';
                 } else {
@@ -353,9 +425,21 @@ function updatePaperBar() {
     };
 
     var rowExit = function (rowSelection) {
-        rowSelection.select("text")
-            .style("fill", "none")
-        ;
+        rowSelection.select("text").style("fill", "none");
+    };
+
+    var totalRows = function() {
+        if (selectedYear != null)
+            return (paperData[selectedYear].length);
+        else
+            return 50;
+    };
+
+    var sideData = function() {
+        if (selectedYear != null)
+            return paperData[selectedYear];
+        else
+            return [];
     };
 
     var virtualScroller = d3.VirtualScroller()
@@ -364,10 +448,10 @@ function updatePaperBar() {
         .update(rowUpdate)
         .exit(rowExit)
         .svg(scrollSVG)
-        .totalRows(paperList.length)
+        .totalRows(totalRows())
         .viewport(d3.select(".viewport"));
 
-    virtualScroller.data(titleList);
+    virtualScroller.data(sideData());
 
     chartGroup.call(virtualScroller);
     d3.select(".viewport").node().scrollTop = predefine;
@@ -383,6 +467,47 @@ function updatePaperBar() {
 d3.json("Data/all_papers.json", function (error, loadedData) {
     if (error) throw error;
     paperData = loadedData;
+    getMaxCitations();
     updateYearBar();
     //updatePaperBar();
 });
+
+function sortByTitle() {
+    function compareTitle(a,b) {
+        if (a.title < b.title)
+            return -1;
+        if (a.title > b.title)
+            return 1;
+        return 0;
+    }
+
+    for (year = 2015; year > 2001; year--) {
+        paperData[year].sort(compareTitle);
+        //paperData[year].sort(compareCitation);
+    }
+
+    selectedPaper = null;
+    //selectedYear = null;
+
+    changeSelection();
+}
+
+function sortByCitation() {
+    function compareCitation(a,b) {
+        if (a.cited_by.length > b.cited_by.length)
+            return -1;
+        if (a.cited_by.length < b.cited_by.length)
+            return 1;
+        return 0;
+    }
+
+    for (var year = 2015; year > 2001; year--) {
+        //paperData[year].sort(compareTitle);
+        paperData[year].sort(compareCitation);
+    }
+
+    selectedPaper = null;
+    //selectedYear = null;
+
+    changeSelection();
+}

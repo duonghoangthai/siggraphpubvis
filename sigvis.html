@@ -30,11 +30,11 @@
         }
         
         div {
-            display: inline-block;
-            border: 1px solid lightgray;
-            margin: 10px;
+            /*display: inline-block;*/
+            /*border: 1px solid lightgray;*/
+            /*margin: 10px;*/
         }
-        
+
         div,
         span {
             padding: 10px;
@@ -42,11 +42,11 @@
 
         .viewport {
             position: absolute;
-            top: 113px;
+            top: 114px;
             left: 979px;
             overflow-y: auto;
-            width: 300px;
-            height: 404px;
+            width: 200px;
+            height: 460px;
         }
 
     </style>
@@ -60,11 +60,19 @@
     <br/>
     <hr/>
 
+    <span>
+    <button onclick="sortByTitle()">Sort by title</button>
+    </span>
+
+    <span>
+    <button onclick="sortByCitation()">Sort by citation</button>
+    </span>
+
     <span id="info"></span>
     <br/>
     <div class="viewport"></div>
     <div>
-        <svg id="pView" width="950" height="400">
+        <svg id="pView" width="950" height="500">
             <g id="yearBoundingBox"></g>
             <g id="axis"></g>
             <g id="b2002"></g>
