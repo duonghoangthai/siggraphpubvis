@@ -11,17 +11,23 @@ var paperData,
     maxPaperCitedAndCitations
     ;
 
+/**
+ * @param {{cited_by:[]}} data
+ */
+
+function getCitedBy(data) {return data.cited_by;}
+
 function getMaxCitations() {
     maxPaperCitations = [];
     maxPaperCitedAndCitations = [];
     for (var year = 2002; year < 2016; year++) {
-        if (paperData.hasOwnProperty(year)) {
+        if (paperData.hasOwnProperty(year.toString())) {
             (function () {
                 var maxCitation = 0;
                 var i;
                 for (i = 0; i < paperData[year].length; i++)
                     //console.log(paperData[year][i].cited_by.length)
-                    maxCitation = Math.max(maxCitation, paperData[year][i].cited_by.length);
+                    maxCitation = Math.max(maxCitation, getCitedBy(paperData[year][i]).length);
                 maxPaperCitations.push(maxCitation);
 
                 var maxCitedAndCitation = 0;
@@ -182,13 +188,10 @@ function updateYearBar() {
     var selection;
     var j = 0;
     var highlight_PaperIdx = 0;
+    var highlight_PaperTotal = 0;
     if (selectedPaper) {
-        var highlight_PaperTotal = selectedPaper[0][0].__data__.cited_by.length +
+        highlight_PaperTotal = selectedPaper[0][0].__data__.cited_by.length +
             selectedPaper[0][0].__data__.references.length+1;
-        //var yOffset = titleBegin/highlight_PaperTotal;
-    } else {
-        var highlight_PaperTotal = 0;
-        //var yOffset = 0;
     }
 
     var yWidth = 470/52;
@@ -197,14 +200,14 @@ function updateYearBar() {
     //console.log(highlight_PaperTotal);
 
     for (year = 2015; year > 2001; year--) {
-        if (paperData.hasOwnProperty(year)) {
+        if (paperData.hasOwnProperty(year.toString())) {
             (function () {
                 var xOffset = 13 - j;
                 barId = "#b" + year;
-
+                var currentData = paperData[year];
                 selection = d3.select(barId)
                     .selectAll("text")
-                    .data(paperData[year]);
+                    .data(currentData);
 
                 selection.enter().append("text")
                     .text(function (d) {
@@ -222,7 +225,7 @@ function updateYearBar() {
                     })
                     .attr("transform", function (d, i) {
                         return "translate(" + ((xOffset + 1) * dWidth - 15 - 40) + ","
-                            + (titleBegin - 0.5 * fontSize - (paperData[year].length - i) * (fontSize + 0.5)) + ")"
+                            + (titleBegin - 0.5 * fontSize - (currentData.length - i) * (fontSize + 0.5)) + ")"
                     })
                     .attr("fill", function (d) {
                         if (selectedPaper) {
@@ -297,10 +300,10 @@ function updateYearBar() {
                                 //;
                             } else
                                 return "translate(" + ((xOffset + 1) * dWidth - 15 - 40) + ","
-                                    + (titleBegin - 0.5 * fontSize - (paperData[year].length - i) * (fontSize + 0.5)) + ")"
+                                    + (titleBegin - 0.5 * fontSize - (currentData.length - i) * (fontSize + 0.5)) + ")"
                         } else {
                             return "translate(" + ((xOffset + 1) * dWidth - 15 - 40) + ","
-                                + (titleBegin - 0.5 * fontSize - (paperData[year].length - i) * (fontSize + 0.5)) + ")"
+                                + (titleBegin - 0.5 * fontSize - (currentData.length - i) * (fontSize + 0.5)) + ")"
                         }
                     })
                     .text(function (d) {
@@ -514,7 +517,7 @@ function sortByTitle() {
         return 0;
     }
 
-    for (year = 2015; year > 2001; year--) {
+    for (var year = 2015; year > 2001; year--) {
         paperData[year].sort(compareTitle);
         //paperData[year].sort(compareCitation);
     }
