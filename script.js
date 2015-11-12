@@ -171,6 +171,12 @@ function updateYearBar() {
         })
     ;
 
+    // Draw dashed line for each year
+    var maxHeights = [];
+    for (year = 2002; year < 2016; year++) {
+        maxHeights.push(titleBegin);
+    }
+
     // Draw paper titles
     var barId;
     var selection;
@@ -195,16 +201,10 @@ function updateYearBar() {
             (function () {
                 var xOffset = 13 - j;
                 barId = "#b" + year;
-                //var titleList = [];
-                var paperList = paperData[year];
-                //for (var i = 0; i < paperList.length; i++)
-                //    titleList.push(paperList[i].title);
-                //
-                //titleList.sort();
 
                 selection = d3.select(barId)
                     .selectAll("text")
-                    .data(paperList);
+                    .data(paperData[year]);
 
                 selection.enter().append("text")
                     .text(function (d) {
@@ -222,7 +222,7 @@ function updateYearBar() {
                     })
                     .attr("transform", function (d, i) {
                         return "translate(" + ((xOffset + 1) * dWidth - 15 - 40) + ","
-                            + (titleBegin - 0.5 * fontSize - (paperList.length - i) * (fontSize + 0.5)) + ")"
+                            + (titleBegin - 0.5 * fontSize - (paperData[year].length - i) * (fontSize + 0.5)) + ")"
                     })
                     .attr("fill", function (d) {
                         if (selectedPaper) {
@@ -234,11 +234,19 @@ function updateYearBar() {
                             return 'black';
                         }
                     })
-                    //.on("click", function() {
-                    //    selectedPaper = d3.select(this);
-                    //    changeSelection();
-                    //    d3.event.stopPropagation();
-                    //})
+                    .on("click", function(d) {
+                        if (selectedPaper) {
+                            if (d.title == selectedPaper[0][0].__data__.title ||
+                                references.indexOf(d.id) > -1 ||
+                                citedBy.indexOf(d.id) > -1) {
+                                selectedPaper = d3.select(this);
+                                getCitations();
+                                changeSelection();
+                            }
+                            d3.event.stopPropagation();
+                        } else
+                            d3.event.stopPropagation();
+                    })
                     .on("mouseover", function () {
 
                     })
@@ -254,7 +262,7 @@ function updateYearBar() {
                             if (d.title === selectedPaper[0][0].__data__.title) return 'black';
                             if (references.indexOf(d.id) > -1) return 'red';
                             if (citedBy.indexOf(d.id) > -1) return 'blue';
-                            return 'lightgrey';
+                            return 'none';
                         } else {
                             return 'black';
                         }
@@ -276,6 +284,9 @@ function updateYearBar() {
                                 references.indexOf(d.id) > -1 ||
                                 citedBy.indexOf(d.id) > -1) {
                                 highlight_PaperIdx = highlight_PaperIdx + 1;
+                                maxHeights[d.year-2002] = Math.min(maxHeights[d.year-2002],
+                                    (titleBegin - ((highlight_PaperIdx-1) * yWidth + yOffset) - 5));
+
                                 return "translate(" + ((xOffset + 1) * dWidth - 15 - 40) + ","
                                     + (titleBegin - ((highlight_PaperIdx-1) * yWidth + yOffset)  + ")"
                                     //+ "rotate(-45)")
@@ -286,10 +297,10 @@ function updateYearBar() {
                                 //;
                             } else
                                 return "translate(" + ((xOffset + 1) * dWidth - 15 - 40) + ","
-                                    + (titleBegin - 0.5 * fontSize - (paperList.length - i) * (fontSize + 0.5)) + ")"
+                                    + (titleBegin - 0.5 * fontSize - (paperData[year].length - i) * (fontSize + 0.5)) + ")"
                         } else {
                             return "translate(" + ((xOffset + 1) * dWidth - 15 - 40) + ","
-                                + (titleBegin - 0.5 * fontSize - (paperList.length - i) * (fontSize + 0.5)) + ")"
+                                + (titleBegin - 0.5 * fontSize - (paperData[year].length - i) * (fontSize + 0.5)) + ")"
                         }
                     })
                     .text(function (d) {
@@ -309,6 +320,28 @@ function updateYearBar() {
             })();
         }
     }
+
+    // Draw dashed line for each year
+    //console.log(maxHeights);
+    var dashedLines = d3.select("#yearDashedLine").selectAll("line").data(maxHeights);
+
+    dashedLines.enter().append("line")
+        .attr("x1", function (d,i) { return (i + 1) * dWidth - 15 - 40;})
+        .attr("y1", titleBegin)
+        .attr("x2", function (d,i) { return (i + 1) * dWidth - 15 - 40;})
+        .attr("y2", function (d) { return d;})
+        .attr("stroke-width", 1)
+        .attr("stroke", "black")
+        .style("stroke-dasharray", ("3, 2"))
+    ;
+
+    dashedLines.transition()
+        .duration(500)
+        .attr("x1", function (d,i) { return (i + 1) * dWidth - 15 - 40;})
+        .attr("y1", titleBegin)
+        .attr("x2", function (d,i) { return (i + 1) * dWidth - 15 - 40;})
+        .attr("y2", function (d) { return d;})
+    ;
 }
 
 function updatePaperBar() {
