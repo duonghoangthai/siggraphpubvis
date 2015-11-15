@@ -9,7 +9,9 @@ var paperData,
     citedBy,
     selectedYearPaperBackup,
     maxPaperCitations,
-    maxPaperCitedAndCitations
+    maxPaperCitedAndCitations,
+    searchTarget,
+    searchResult
     ;
 
 /**
@@ -115,7 +117,7 @@ function updateYearBar() {
      })
      ;
      });
-     */
+    */
 
     //sortPapers();
 
@@ -514,3 +516,29 @@ function sortByCitation() {
     backupSelectedYear();
     changeSelection();
 }
+
+// click button "search"
+function searchTitle() {
+    searchResult = [];
+    var target = new RegExp(searchTarget, "i");
+    //console.log(target);
+    for (var year = 2002; year < 2016; year++) {
+        if (paperData.hasOwnProperty(year.toString())) {
+            (function () {
+                var i;
+                for (i = 0; i < paperData[year].length; i++)
+                    if(paperData[year][i].title.match(target))
+                        searchResult.push(paperData[year][i]);
+            })();
+        }
+    }
+    console.log(searchTarget);
+    console.log(searchResult.length);
+    for(var i = 0; i < searchResult.length; i++)
+        console.log(searchResult[i].title);
+
+}
+
+d3.select("#searchInput").on("input", function() {
+    searchTarget = this.value;
+});
