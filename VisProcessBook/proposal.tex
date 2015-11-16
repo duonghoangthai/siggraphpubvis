@@ -1,0 +1,80 @@
+\section{Introduction and background}
+% Basic Info. The project title, your names, e-mail addresses, UIDs, a link to the project repository.
+% Background and Motivation. Discuss your motivations and reasons for choosing this project, especially any background or research interests that may have influenced your decision.
+When surveying a new field, researchers often want an overview look at the important papers in the field, how they are related, and how popular trends in topics or techniques have been evolving over the years. Traditional search engines such as Google Scholar and digital libraries such as the ACM's can alleviate the task, but only when the researcher has a good idea of what he should look for. Even then, the information obtained from those tools at any given moment is not only too specific but also presented in a non-visual form, making it difficult for the user to see a bigger picture.
+
+Being both interested in doing research in computer graphics, in this project we aim to develop a tool to visualize connections between papers published over the years in SIGGRAPH, the most important conference in computer graphics. The tool should show in one place: the citation relationships among SIGGRAPH papers, important papers in each sub-field, prolific authors and their collaboration patterns, popular topics and methods in recent years, and active research institutions in each sub-field. It is our hope that such a tool can be particularly helpful to someone who wants to survey a field and summarize major results. It could also help new researchers in finding not only interesting problems to work on but also pointers to relevant publications for reference. Lastly, prospective graduate students can use information provided by the tool to make more informed decision in their application process.
+
+When searching for project ideas, we stumbled upon Autodesk's \href{http://www.autodeskresearch.com/projects/citeology}{Citeology} and this work gives us motivations to propose the current project.
+
+\section{Project Objectives}
+% Project Objectives. Provide the primary questions you are trying to answer with your visualization. What would you like to learn and accomplish? List the benefits.
+Our project aims to answer the following questions:
+\begin{itemize}
+    \item What papers are influential in the field, in terms of citation count?
+    \item Given a paper of interest, what papers does it cite? What are the papers citing it?
+    \item What topics and techniques are popular, and in which time periods?
+    \item Given a set of keywords, what are the most relevant papers/authors/institutions to these keywords?
+    \item Who does each author collaborate with the most?
+    \item What institutions are more active in a given field, in terms of publication count?    
+\end{itemize}
+Answering the above questions will put a make a researcher more informed about what papers/authors/topics/techniques to pay more attention to, thereby saving time in the beginning of a survey task. It can also reveal interesting patterns and trends in the past that can help him or her better decide on future research directions for a particular topic of interest.
+
+\section{Data}
+% Data. From where and how are you collecting your data? If appropriate, provide a link to your data sources.
+Our data comes from multiple sources.
+\begin{itemize}
+    \item Paper texts are downloaded from the \href{http://dl.acm.org/}{ACM Digital Library}. From these we extract the title, authors and their affiliations, references, and important keywords.
+    \item BibTeX information for all papers is downloaded from  the \href{http://dblp.uni-trier.de/db/}{Digital Bibliographic Library Browser}.
+    \item Citation count information is queried from \href{https://scholar.google.com/}{Google Scholar}.
+\end{itemize}
+
+\section{Data Processing}
+% Data Processing. Do you expect to do substantial data cleanup? What quantities do you plan to derive from your data? How will data processing be implemented?
+We expect our raw data to require a substantial cleanup process. So far we have collected all the SIGGRAPH papers's pdf files from 2002 to 2015, totaling 17GB of data. These pdf files will be converted to text format, from which we will extract from each paper its title, authors and their affiliations, references and keywords. The extraction process is done using a combination of homemade Python scripts and opensource tools such as \href{http://aye.comp.nus.edu.sg/parsCit/}{ParsCit}.
+
+Meaningful keyword extraction is the most difficult step of the extraction process. Most papers provide a set of "keywords" after the abstract but in our experience, these keywords are not meaningful enough: in any given year, most keywords are used by only one paper. We are looking into using an auto-summarizing tools for this step. Because of the uncertainty of keyword extraction, all features that require keywords will be optional.
+
+We have done cursory testing of our tools and they seemed to be able to extract the required information with high accuracy, thanks to the uniformity in format of the papers. There is still some chance that noise will show up in the extracted data, in which case some post-process cleaning has to be done. We will finally need to remove all non-SIGGRAPH papers from the list of references to make our data more self-contained and easier to work with.
+
+Since our data is highly relational, we plan to store it in an SQL database and query the data with Javascript. At the moment \href{https://github.com/kripken/sql.js/}{sql.js} and \href{https://github.com/mapbox/node-sqlite3}{node-sqlite3} seem to be promising candidates. Tentatively, there will be different tables, one for each of the following: papers, authors, institutions, keywords. Each entry in a table will have necessary fields, for example a paper will contain links to its authors and keywords, an author entry will have links back to his or her papers, and (optionally) links to the institution where he/she worked when a paper was published.
+
+An alternative design is to flatten all the SQL tables into JSON files and load those instead. The SQL approach allows us to not having to load everything into memory at once, perhaps at the cost of more processing time each time users change their query/filter of the data. It is not yet clear to us how big the data will be, and which one of the two approaches will work better.
+
+\section{Visualization Design}
+\subsection{Proposed Design}
+% Visualization Design. How will you display your data? Provide some general ideas that you have for the visualization design. Develop three alternative prototype designs for your visualization. Create one final design that incorporates the best of your three designs. Describe your designs and justify your choices of visual encodings. We recommend you use the Five Design Sheet Methodology.
+Our design will consist of four different views (Fig. \ref*{fig:overview}):
+
+\textbf{Paper view (the main view)}. Here we show all the papers, grouped by year. Each year occupies one column. This view will be wide enough to show about ten years but will be scrollable horizontally to move the focus to a different period of time. Each paper's title will appear on one row and be click-able. When a paper is clicked on, the papers that this paper cites and the ones that cite it will be highlighted (Fig. \ref{fig:paper_view}). Moreover, when a paper is moused over, a pop-up will show the paper's full title, author lists, keywords, and DOI link (Fig. \ref{fig:pop-up}). A bar will appear right under each paper's title, the length of which is proportional to the paper's number of citations (this is not yet shown in our design sketches). This help the user identify influential papers at a glance.
+
+This whole paper view can be sorted either alphabetically or by citation count. The papers can also be filtered by citation count, to hide papers with lesser impacts. We provide two checkboxes and a slider for these purposes.
+
+\textbf{Institution view}. Here we show a map of all the institutions that have published papers to SIGGRAPH. They will appear as circles on a projected world map. The bigger the circle is, the more publications that institution has in the selected time period. Mousing over an institution will show its name and address. We chose a map for this view because for an institution, the geographical information can be important, for example, to a prospective graduate student looking for a school to apply to. Displaying a large amount of items using circles is also space-conserving.
+
+\textbf{Author view}. In this view we show all paper authors and their collaboration relationships as a node-link diagram. Each author is a node, and two authors are linked if they have written a paper together. Bigger nodes represent more prolific authors, in terms of some metrics such as the H-index. Mousing over an author will show his/her name and affiliations. The reason we chose a node-link diagram for this view is because it highlights quite nicely the clusters between subsets of nodes, and the view is dynamic so it is easier to put any author at the center (for example, when his paper is being selected).
+
+\textbf{Keyword view}. This view acts both as a view and a filter. Here we list all the keywords extracted from all the papers in alphabetical order. Keywords are selectable, and each time a keyword is clicked on, the related keywords are highlighted. This feature is particularly useful when the user clicks on a topic keyword (for example: "global illumination"), and the related keywords show common techniques used to solve problems related to that topic (for example: "path tracing", "radiosity", "photon mapping" which are common methods in graphics to achieve "global illumination"). Two keywords are related if they appear together in many papers. Moreover, selecting a set of keywords will reduce the amount of information shown in the other views, to retain only the papers/authors/institutions that are related to the selected set of keywords. This is useful because the list of papers/authors/institutions can be quite large. Fig \ref{fig:click_keyword} shows an initial design of this idea, where the list of papers was not really filtered by simply highlighted and re-sorted. This feature can be very interesting because a glance at the paper view can tell us the popularity of the current selected set of keywords throughout the years.
+
+\textbf{Interaction between views}. In the previous section we described what happens to the other three views when a keyword is selected. All the elements in the first three views can be clicked on as well. When a paper is clicked on, the corresponding authors will be highlighted and brought to the center of the view, and the corresponding institutions will also be highlighted. We will also highlight the selected paper's keywords. See Fig. \ref*{fig:select_paper} for an illustration of this.
+
+Similarly, an institution or an author can be clicked on, and corresponding papers and keywords will be highlighted as well (See Fig. \ref{fig:select_author}).
+
+Finally, the paper view supports the use of a brush to limit the data in other views to a particular period of time (see Fig. \ref{fig:brush}).
+
+
+\subsection{Alternative Designs}
+
+We thought about two other alternatives to represent the keyword list: a radial Reingold-Tilford Tree (\ref{fig:radial_tree}), and a zoomable multi-layer ring (\ref{fig:zoomable_ring}). These ideas are inspired by \href{http://bl.ocks.org/mbostock/4063550}{designs} we found on Mike Bostock's \href{http://bl.ocks.org/metmajer/5480307}{website}. We decided that these designs make it harder for users to read the keywords, and our keyword list is flat rather than a hierarchical and thus would be unsuitable for these hierarchical designs.
+
+For the paper view, we thought about using lines to show citation relationship between papers. However these lines would block underlying papers, and feel redundant because we can encode the citation relationship no less effectively using less "ink" in our proposed design.
+
+\section{Features}
+\subsection{Must-Have Features}
+% Must-Have Features. List the features without which you would consider your project to be a failure.
+The paper, institution, and author views are must-have features. All the proposed interactions between these three views are essential and must be implemented.
+\subsection{Optional Features}
+% Optional Features. List the features which you consider to be nice to have, but not critical.
+Because it is considerably harder to extract meaningful keywords out of a paper, we will implement the keyword view and all related interactions last. In the event that it becomes too hard to do, this view will be left out of the design.
+
+The details pop-ups that appear when mousing over each paper will also be an optional feature as they do not affect the core usability and usefulness of the project.

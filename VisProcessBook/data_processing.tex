@@ -1,0 +1,61 @@
+Our data acquisition and processing pipeline is as follows:
+\begin{itemize}
+    \item We start by downloading all SIGGRAPH publications (in PDF format) since 2002 from the ACM Digital Library. 
+    \item Download BibTeX files (in XML format) for all SIGGRAPH and TOG papers from the Digital Bibliographic Library Browser
+    \item Use a PDF processing tool to perform OCR and convert all the PDF files to TXT.
+    \item Based on the TXT files, use ParsCit to extract the title and abstract from each paper.
+    \item Use a homegrown tool (written in Python) to extract the list of references from each paper.
+    \item Use another homegrown tool (in Python) to query Google Scholar to get the number of citations for all papers. This step is needed because we want to account for citations from non-SIGGRAPH papers as well.
+    \item To extract the keywords, we use a Web service called Alchemy API (from IBM). The keywords returned by this tool will be combined with the keywords extracted directly from each paper's Keywords section.
+    \item Finally we use a Python script to combine all the extracted information into a data structure in memory, from which we write several JSON files ready to be used by our Vis scripts.
+\end{itemize}
+
+At the moment, we have finished extracting all the essential information (title, author, year, references, citation count, DOI link) from our paper database, and produced working JSON files that have been used in our prototype. Below is an excerpt from our main JSON file:
+
+\begin{lstlisting}
+"2002": [
+{
+    "authors": [
+    "Jeffrey Smith", 
+    "Jessica K. Hodgins", 
+    "Irving Oppenheim", 
+    "Andrew P. Witkin"
+    ], 
+    "cited_by": [
+    1349, 
+    1384, 
+    1543, 
+    1752, 
+    1704, 
+    1846
+    ], 
+    "id": 69, 
+    "link": "http://doi.acm.org/10.1145/566654.566580", 
+    "references": [], 
+    "title": "Creating models of truss structures with optimization", 
+    "year": "2002"
+}, 
+{
+    "authors": [
+    "Timothy J. Purcell", 
+    "Ian Buck", 
+    "William R. Mark", 
+    "Pat Hanrahan"
+    ], 
+    "cited_by": [
+    163, 
+    124, 
+    134, 
+    93, 
+    120, 
+    190
+    ], 
+    "id": 63, 
+    "link": "http://doi.acm.org/10.1145/566654.566640", 
+    "references": [], 
+    "title": "Ray tracing on programmable graphics hardware", 
+    "year": "2002"
+}, 
+\end{lstlisting}
+
+This database will be updated once the keyword extraction step finishes, in at most two days, at which point there will be no data gathering tasks left. Compared to what was written in the proposal, it turned out that extracting the affiliation information for the authors from the paper texts is too difficult, hence we have decided to drop the Institution view from the project.
