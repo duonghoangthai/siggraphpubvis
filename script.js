@@ -19,6 +19,10 @@ var paperData,
  */
 function getCitedBy(data) {return data.cited_by;}
 /**
+ * @param {{cited_count:[]}} data
+ */
+function getCitedCount(data) {return data.cited_count;}
+/**
  * @param {{references:[]}} data
  */
 function getReferences(data) {return data.references;}
@@ -32,7 +36,7 @@ function getMaxCitations() {
                 var maxCitation = 0;
                 var i;
                 for (i = 0; i < paperData[year].length; i++)
-                    maxCitation = Math.max(maxCitation, getCitedBy(paperData[year][i]).length);
+                    maxCitation = Math.max(maxCitation, getCitedCount(paperData[year][i]));
                 maxPaperCitations.push(maxCitation);
 
                 var maxCitedAndCitation = 0;
@@ -50,7 +54,7 @@ function getMaxCitations() {
 // get cite_by and references from selected papaer to global variables
 function getCitations() {
     references = selectedPaper[0][0].__data__.references;
-    citedBy = selectedPaper[0][0].__data__.cited_by;
+    citedBy = getCitedBy(selectedPaper[0][0].__data__);
 }
 
 // back up select year papers to selectedYearPaperBackup
@@ -389,7 +393,7 @@ function updatePaperBar() {
     var rowEnter = function (rowSelection) {
         rowSelection.append("rect")
             .attr("y", 15)
-            .attr("width", function(d){return citationScale(d.cited_by.length)})
+            .attr("width", function(d){return citationScale(d.cited_count)})
             .attr("height", "3")
             .attr("fill", "orange")
         ;
@@ -408,7 +412,7 @@ function updatePaperBar() {
     var rowUpdate = function (rowSelection) {
         rowSelection.select("rect")
             .attr("width", function(d){
-                return citationScale(d.cited_by.length);
+                return citationScale(d.cited_count);
             })
             .attr("fill", function (d) {
                 if (selectedPaper) {
@@ -430,6 +434,7 @@ function updatePaperBar() {
                 } else {return 'black';}
             })
             .on("click", function () {
+                console.log(d3.select(this));
                 selectedPaper = d3.select(this);
                 getCitations();
                 changeSelection();
@@ -473,7 +478,7 @@ function updatePaperBar() {
 // above this is just function definitions
 // (nothing actually happens)
 
-d3.json("Data/all_papers.json", function (error, loadedData) {
+d3.json("Data/all_papers_cited_count.json", function (error, loadedData) {
     if (error) throw error;
     paperData = loadedData;
     getMaxCitations();
@@ -501,9 +506,9 @@ function sortByTitle() {
 // click button "sortByCitation"
 function sortByCitation() {
     function compareCitation(a,b) {
-        if (a.cited_by.length > b.cited_by.length)
+        if (a.cited_count > b.cited_count)
             return -1;
-        if (a.cited_by.length < b.cited_by.length)
+        if (a.cited_count < b.cited_count)
             return 1;
         return 0;
     }
