@@ -48,9 +48,8 @@ for dir in next(os.walk(work_dir))[1]:
             print ('Exception in file ' + file)
             print (e)
 
-
-
 paper_in_siggraph = {}
+all_keywords_non_unique = 0
 
 # we need to replace all the weird characters by space ' ', then trim the spaces, then make every
 # character lowercase
@@ -97,14 +96,20 @@ for dir in next(os.walk(work_dir))[1]:
                     content = f.read()
                     parsed_keyword_file = json.loads(content)
                     keywords_array = parsed_keyword_file['keywords']
+                    keywords_dict = {}
                     for kw in keywords_array:
-                        found_paper.keywords += [kw['text']]
-                        all_keywords[kw['text']] = True
+                        for k in kw['text'].split():
+                            keywords_dict[k] = True
+                    for k, _ in keywords_dict.iteritems():
+                        found_paper.keywords += [k]
+                        all_keywords[k] = True
+                    all_keywords_non_unique += len(found_paper.keywords)
             except Exception as e:
                 print('Error in ' + keyword_file)
                 print e
 
-print (len(all_keywords.items()))
+print(len(all_keywords))
+print(all_keywords_non_unique)
 
 class PaperDictionary(dict):
     def __init__(self,*arg,**kw):
