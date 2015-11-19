@@ -13,8 +13,10 @@ class Paper(JSONEncoder):
         self.year = 0
         self.references = []
         self.cited_by = []
+        self.keywords = []
 
 all_papers = {}
+all_keywords = {}
 
 # remove all non-alphanumeric characters in the title, and turn all characters into lowercase
 def normalize_title(input):
@@ -89,6 +91,21 @@ for dir in next(os.walk(work_dir))[1]:
                         found_paper.references += [found_ref.id]
                         found_ref.cited_by += [found_paper.id]
 
+            try:
+                keyword_file = work_dir + '/' + dir + '/' + file[:-14] + 'pdf-keywords.txt'
+                with open(keyword_file, 'r') as f:
+                    content = f.read()
+                    parsed_keyword_file = json.loads(content)
+                    keywords_array = parsed_keyword_file['keywords']
+                    for kw in keywords_array:
+                        found_paper.keywords += [kw['text']]
+                        all_keywords[kw['text']] = True
+            except Exception as e:
+                print('Error in ' + keyword_file)
+                print e
+
+print (len(all_keywords.items()))
+
 class PaperDictionary(dict):
     def __init__(self,*arg,**kw):
         super(PaperDictionary, self).__init__(*arg, **kw)
@@ -107,6 +124,9 @@ for k, p in all_papers.iteritems():
             all_papers_in_siggraph[p.year] += [p]
         except:
             all_papers_in_siggraph[p.year] = [p]
+
+# parse the keywords
+
 
 with open(work_dir + '/' + 'all_papers.json', 'w') as f:
     f.write(all_papers_in_siggraph.to_JSON())
