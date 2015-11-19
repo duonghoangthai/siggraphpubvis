@@ -8,14 +8,13 @@
         #links > line {
             stroke: rgb(216, 216, 216);
         }
-        
-        #xAxis path,
-        #yAxis path {
-            fill: none;
-            stroke: black;
+
+        .overlay{
+            background-color:#EEE;
         }
 
-        #yAxis line {
+        .axis path,
+        .axis line {
             fill: none;
             stroke: black;
             shape-rendering: crispEdges;
@@ -30,24 +29,24 @@
         }
         
         div {
-            /*display: inline-block;*/
-            /*border: 1px solid lightgray;*/
-            /*margin: 10px;*/
+            display: inline-block;
+            border: 1px solid lightgray;
+            margin: 10px;
         }
 
-        div,
-        span {
-            padding: 10px;
-        }
+        /*div,*/
+        /*span {*/
+            /*padding: 10px;*/
+        /*}*/
 
-        .viewport {
-            position: absolute;
-            top: 114px;
-            left: 979px;
-            overflow-y: auto;
-            width: 200px;
-            height: 460px;
-        }
+        /*.viewport {*/
+            /*position: absolute;*/
+            /*top: 114px;*/
+            /*left: 979px;*/
+            /*overflow-y: auto;*/
+            /*width: 200px;*/
+            /*height: 460px;*/
+        /*}*/
 
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
@@ -57,8 +56,14 @@
 <body>
     <h3>Siggraph Visualization</h3>
 
-    <br/>
     <hr/>
+
+    <label for="searchInput">Search by Title</label>
+    <input id="searchInput" type="text" />
+
+    <span>
+    <button onclick="searchTitle()">Search</button>
+    </span>
 
     <span>
     <button onclick="sortByTitle()">Sort by title</button>
@@ -68,39 +73,19 @@
     <button onclick="sortByCitation()">Sort by citation</button>
     </span>
 
-    <label for="searchInput">Search by Title</label>
-    <input id="searchInput" type="text" />
+    <span>
+    <button onclick="clearSelectedPaper()">Clear</button>
+    </span>
 
     <span>
-    <button onclick="searchTitle()">Search</button>
+        <label><input id="citationCheckbox" type="checkbox"> Citations</label>
     </span>
+
+
 
     <span id="info"></span>
     <br/>
-    <div class="viewport"></div>
-    <div>
-        <svg id="pView" width="950" height="500">
-            <g id="yearBoundingBox"></g>
-            <g id="axis"></g>
-            <g id="b2002"></g>
-            <g id="b2003"></g>
-            <g id="b2004"></g>
-            <g id="b2005"></g>
-            <g id="b2006"></g>
-            <g id="b2007"></g>
-            <g id="b2008"></g>
-            <g id="b2009"></g>
-            <g id="b2010"></g>
-            <g id="b2011"></g>
-            <g id="b2012"></g>
-            <g id="b2013"></g>
-            <g id="b2014"></g>
-            <g id="b2015"></g>
-            <g id="b2015"></g>
-            <g id="papersPort"></g>
-            <g id="yearDashedLine"></g>
-        </svg>
-    </div>
+    <div id="pView"></div>
 
     <script type="application/javascript" src="script.js"></script>
     <script type="application/javascript" src="fisheye.js"></script>
