@@ -1,0 +1,60 @@
+\documentclass[12pt]{article}
+
+% Any percent sign marks a comment to the end of the line
+
+% Every latex document starts with a documentclass declaration like this
+% The option dvips allows for graphics, 12pt is the font size, and article
+%   is the style
+
+\usepackage[pdftex]{graphicx}
+\usepackage{url}
+\usepackage[pdftex]{hyperref}
+\usepackage{listings}
+
+% These are additional packages for "pdflatex", graphics, and to include
+% hyperlinks inside a document.
+
+\setlength{\oddsidemargin}{0.25in}
+\setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{0in}
+\setlength{\textheight}{8.5in}
+
+% These force using more of the margins that is the default style
+
+\begin{document}
+
+% Everything after this becomes content
+% Replace the text between curly brackets with your own
+
+\title{CS 6630 Project Process Book\\Visualizing SIGGRAPH Publications}
+\author{Kui Wu and Duong Hoang\\u0931640 and u0930062\\u0931640@utah.edu and u0933062@utah.edu}
+\date{\today}
+
+% You can leave out "date" and it will be added automatically for today
+% You can change the "\today" date to any text you like
+
+
+\maketitle
+
+\input{proposal}
+
+\section{Project Schedule}
+\input{schedule}
+% Project Schedule. Make sure that you plan your work so that you can avoid a big rush right before the final project deadline, and delegate different modules and responsibilities among your team members. Write this in terms of weekly deadlines.
+
+\section{Project Progress - Milestone 1}
+In this section we detail the progress of the project at the point of the milestone (13 November 2015). At this stage, we have devised and tested a working plan for data acquisition and processing, and have almost done executing this plan to obtain all the necessary data. We have also implemented a working prototype for the paper view where we show all the papers and the user can select a year and a paper to see its referenced papers and papers citing it.
+
+\subsection{Data Acquisition and Processing}
+\input{data_processing}
+
+\subsection{Paper View Revolution}
+\input{paper_view_revolution}
+
+\newpage
+\appendix
+\section{Figures in Proposal}
+\input{figures}
+
+
+\end{document}

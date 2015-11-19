@@ -1,41 +1,3 @@
-\documentclass[dvips,12pt]{article}
-
-% Any percent sign marks a comment to the end of the line
-
-% Every latex document starts with a documentclass declaration like this
-% The option dvips allows for graphics, 12pt is the font size, and article
-%   is the style
-
-\usepackage[pdftex]{graphicx}
-\usepackage{url}
-\usepackage{hyperref}
-\usepackage{listings}
-
-% These are additional packages for "pdflatex", graphics, and to include
-% hyperlinks inside a document.
-
-\setlength{\oddsidemargin}{0.25in}
-\setlength{\textwidth}{6.5in}
-\setlength{\topmargin}{0in}
-\setlength{\textheight}{8.5in}
-
-% These force using more of the margins that is the default style
-
-\begin{document}
-
-% Everything after this becomes content
-% Replace the text between curly brackets with your own
-
-\title{CS 6630 Project Proposal\\Visualizing SIGGRAPH Publications}
-\author{Kui Wu and Duong Hoang\\u0931640 and u0930062\\u0931640@utah.edu and u0933062@utah.edu}
-\date{\today}
-
-% You can leave out "date" and it will be added automatically for today
-% You can change the "\today" date to any text you like
-
-
-\maketitle
-
 \section{Introduction and background}
 % Basic Info. The project title, your names, e-mail addresses, UIDs, a link to the project repository.
 % Background and Motivation. Discuss your motivations and reasons for choosing this project, especially any background or research interests that may have influenced your decision.
@@ -84,30 +46,9 @@ An alternative design is to flatten all the SQL tables into JSON files and load 
 % Visualization Design. How will you display your data? Provide some general ideas that you have for the visualization design. Develop three alternative prototype designs for your visualization. Create one final design that incorporates the best of your three designs. Describe your designs and justify your choices of visual encodings. We recommend you use the Five Design Sheet Methodology.
 Our design will consist of four different views (Fig. \ref*{fig:overview}):
 
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[width=160mm]{visproposalDrawing_page_Part_1.pdf}
-    \caption{Overview}
-    \label{fig:overview}
-\end{figure}
-
 \textbf{Paper view (the main view)}. Here we show all the papers, grouped by year. Each year occupies one column. This view will be wide enough to show about ten years but will be scrollable horizontally to move the focus to a different period of time. Each paper's title will appear on one row and be click-able. When a paper is clicked on, the papers that this paper cites and the ones that cite it will be highlighted (Fig. \ref{fig:paper_view}). Moreover, when a paper is moused over, a pop-up will show the paper's full title, author lists, keywords, and DOI link (Fig. \ref{fig:pop-up}). A bar will appear right under each paper's title, the length of which is proportional to the paper's number of citations (this is not yet shown in our design sketches). This help the user identify influential papers at a glance.
 
 This whole paper view can be sorted either alphabetically or by citation count. The papers can also be filtered by citation count, to hide papers with lesser impacts. We provide two checkboxes and a slider for these purposes.
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[width=160mm]{visproposalDrawing_page_Part_2.pdf}
-    \caption{Paper view}
-    \label{fig:paper_view}
-\end{figure}
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[width=160mm]{visproposalDrawing_page_Part_8.pdf}
-    \caption{Paper details pop-up}
-    \label{fig:pop-up}
-\end{figure}
 
 \textbf{Institution view}. Here we show a map of all the institutions that have published papers to SIGGRAPH. They will appear as circles on a projected world map. The bigger the circle is, the more publications that institution has in the selected time period. Mousing over an institution will show its name and address. We chose a map for this view because for an institution, the geographical information can be important, for example, to a prospective graduate student looking for a school to apply to. Displaying a large amount of items using circles is also space-conserving.
 
@@ -115,66 +56,18 @@ This whole paper view can be sorted either alphabetically or by citation count. 
 
 \textbf{Keyword view}. This view acts both as a view and a filter. Here we list all the keywords extracted from all the papers in alphabetical order. Keywords are selectable, and each time a keyword is clicked on, the related keywords are highlighted. This feature is particularly useful when the user clicks on a topic keyword (for example: "global illumination"), and the related keywords show common techniques used to solve problems related to that topic (for example: "path tracing", "radiosity", "photon mapping" which are common methods in graphics to achieve "global illumination"). Two keywords are related if they appear together in many papers. Moreover, selecting a set of keywords will reduce the amount of information shown in the other views, to retain only the papers/authors/institutions that are related to the selected set of keywords. This is useful because the list of papers/authors/institutions can be quite large. Fig \ref{fig:click_keyword} shows an initial design of this idea, where the list of papers was not really filtered by simply highlighted and re-sorted. This feature can be very interesting because a glance at the paper view can tell us the popularity of the current selected set of keywords throughout the years.
 
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[width=160mm]{visproposalDrawing_page_Part_4.pdf}
-    \caption{Keyword filtering}
-    \label{fig:click_keyword}
-\end{figure}
-
 \textbf{Interaction between views}. In the previous section we described what happens to the other three views when a keyword is selected. All the elements in the first three views can be clicked on as well. When a paper is clicked on, the corresponding authors will be highlighted and brought to the center of the view, and the corresponding institutions will also be highlighted. We will also highlight the selected paper's keywords. See Fig. \ref*{fig:select_paper} for an illustration of this.
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[width=160mm]{visproposalDrawing_page_Part_3.pdf}
-    \caption{Select a paper}
-    \label{fig:select_paper}
-\end{figure}
 
 Similarly, an institution or an author can be clicked on, and corresponding papers and keywords will be highlighted as well (See Fig. \ref{fig:select_author}).
 
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[width=160mm]{visproposalDrawing_page_Part_5.pdf}
-    \caption{Select an author}
-    \label{fig:select_author}
-\end{figure}
-
 Finally, the paper view supports the use of a brush to limit the data in other views to a particular period of time (see Fig. \ref{fig:brush}).
 
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[width=160mm]{visproposalDrawing_page_Part_7.pdf}
-    \caption{Brush in paper view}
-    \label{fig:brush}
-\end{figure}
 
 \subsection{Alternative Designs}
 
 We thought about two other alternatives to represent the keyword list: a radial Reingold-Tilford Tree (\ref{fig:radial_tree}), and a zoomable multi-layer ring (\ref{fig:zoomable_ring}). These ideas are inspired by \href{http://bl.ocks.org/mbostock/4063550}{designs} we found on Mike Bostock's \href{http://bl.ocks.org/metmajer/5480307}{website}. We decided that these designs make it harder for users to read the keywords, and our keyword list is flat rather than a hierarchical and thus would be unsuitable for these hierarchical designs.
 
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[width=160mm]{visproposalDrawing_page_Part_9.pdf}
-    \caption{Radial Reingold-Tilford Tree for keywords}
-    \label{fig:radial_tree}
-\end{figure}
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[width=160mm]{visproposalDrawing_page_Part_10.pdf}
-    \caption{Zoomable rings for keywords}
-    \label{fig:zoomable_ring}
-\end{figure}
-
 For the paper view, we thought about using lines to show citation relationship between papers. However these lines would block underlying papers, and feel redundant because we can encode the citation relationship no less effectively using less "ink" in our proposed design.
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[width=160mm]{visproposalDrawing_page_Part_11.pdf}
-    \caption{Arrow links between papers}
-    \label{fig:zoomable_ring}
-\end{figure}
 
 \section{Features}
 \subsection{Must-Have Features}
@@ -185,74 +78,3 @@ The paper, institution, and author views are must-have features. All the propose
 Because it is considerably harder to extract meaningful keywords out of a paper, we will implement the keyword view and all related interactions last. In the event that it becomes too hard to do, this view will be left out of the design.
 
 The details pop-ups that appear when mousing over each paper will also be an optional feature as they do not affect the core usability and usefulness of the project.
-
-\section{Project Schedule}
-\input{schedule}
-% Project Schedule. Make sure that you plan your work so that you can avoid a big rush right before the final project deadline, and delegate different modules and responsibilities among your team members. Write this in terms of weekly deadlines.
-
-\section{Project Progress}
-In this section we detail the progress of the project at the point of the milestone (13 November 2015). At this stage, we have devised and tested a working plan for data acquisition and processing, and have almost done executing this plan to obtain all the necessary data. We have also implemented a working prototype for the paper view where we show all the papers and the user can select a year and a paper to see its referenced papers and papers citing it.
-\subsection{Data Acquisition and Processing}
-Our data acquisition and processing pipeline is as follows:
-\begin{itemize}
-    \item We start by downloading all SIGGRAPH publications (in PDF format) since 2002 from the ACM Digital Library. 
-    \item Download BibTeX files (in XML format) for all SIGGRAPH and TOG papers from the Digital Bibliographic Library Browser
-    \item Use a PDF processing tool to perform OCR and convert all the PDF files to TXT.
-    \item Based on the TXT files, use ParsCit to extract the title and abstract from each paper.
-    \item Use a homegrown tool (written in Python) to extract the list of references from each paper.
-    \item Use another homegrown tool (in Python) to query Google Scholar to get the number of citations for all papers. This step is needed because we want to account for citations from non-SIGGRAPH papers as well.
-    \item To extract the keywords, we use a Web service called Alchemy API (from IBM). The keywords returned by this tool will be combined with the keywords extracted directly from each paper's Keywords section.
-    \item Finally we use a Python script to combine all the extracted information into a data structure in memory, from which we write several JSON files ready to be used by our Vis scripts.
-\end{itemize}
-
-At the moment, we have finished extracting all the essential information (title, author, year, references, citation count, DOI link) from our paper database, and produced working JSON files that have been used in our prototype. Below is an excerpt from our main JSON file:
-
-\begin{lstlisting}
-"2002": [
-{
-    "authors": [
-    "Jeffrey Smith", 
-    "Jessica K. Hodgins", 
-    "Irving Oppenheim", 
-    "Andrew P. Witkin"
-    ], 
-    "cited_by": [
-    1349, 
-    1384, 
-    1543, 
-    1752, 
-    1704, 
-    1846
-    ], 
-    "id": 69, 
-    "link": "http://doi.acm.org/10.1145/566654.566580", 
-    "references": [], 
-    "title": "Creating models of truss structures with optimization", 
-    "year": "2002"
-}, 
-{
-    "authors": [
-    "Timothy J. Purcell", 
-    "Ian Buck", 
-    "William R. Mark", 
-    "Pat Hanrahan"
-    ], 
-    "cited_by": [
-    163, 
-    124, 
-    134, 
-    93, 
-    120, 
-    190
-    ], 
-    "id": 63, 
-    "link": "http://doi.acm.org/10.1145/566654.566640", 
-    "references": [], 
-    "title": "Ray tracing on programmable graphics hardware", 
-    "year": "2002"
-}, 
-\end{lstlisting}
-
-This database will be updated once the keyword extraction step finishes, in at most two days, at which point there will be no data gathering tasks left. Compared to what was written in the proposal, it turned out that extracting the affiliation information for the authors from the paper texts is too difficult, hence we have decided to drop the Institution view from the project.
-
-\end{document}
