@@ -90,26 +90,55 @@ for dir in next(os.walk(work_dir))[1]:
                         found_paper.references += [found_ref.id]
                         found_ref.cited_by += [found_paper.id]
 
+            keywords_array = []
             try:
+                # get the keywords from the keyword files
                 keyword_file = work_dir + '/' + dir + '/' + file[:-14] + 'pdf-keywords.txt'
                 with open(keyword_file, 'r') as f:
                     content = f.read()
                     parsed_keyword_file = json.loads(content)
-                    keywords_array = parsed_keyword_file['keywords']
-                    keywords_dict = {}
-                    for kw in keywords_array:
-                        for k in kw['text'].split():
-                            keywords_dict[k] = True
-                    for k, _ in keywords_dict.iteritems():
-                        found_paper.keywords += [k]
-                        all_keywords[k] = True
-                    all_keywords_non_unique += len(found_paper.keywords)
+                keywords_array = parsed_keyword_file['keywords']
             except Exception as e:
                 print('Error in ' + keyword_file)
                 print e
 
-print(len(all_keywords))
-print(all_keywords_non_unique)
+            # get the keywords from the paper itself
+            keywords_from_paper = []
+            for line in open(work_dir + '/' + dir + '/' + file[:-14] + 'pdf.txt', 'r'):
+                line = line.rstrip('\n')
+                if line.startswith('Keywords:') or line.startswith('KEYWORDS:'):
+                    keywords_from_paper = line[9:].split(',')
+                    break
+
+            keywords_from_paper = "".join([c.lower() if c.isalnum() else " " for c in keywords_from_paper])
+            keywords_from_paper = keywords_from_paper.split()
+
+            # normalize the keywords
+            keywords_dict = {}
+            for kw in keywords_array:
+                if float(kw['relevance']) >= 0.7: # skip keywords whose relevance is low
+                    temp = "".join([c.lower() if c.isalnum() else " " for c in kw['text']])
+                    temp = temp.split()
+                    for k in temp:
+                        keywords_dict[k] = True
+                for k in keywords_from_paper:
+                    keywords_dict[k] = True
+            for k, _ in keywords_dict.iteritems():
+                found_paper.keywords += [k]
+                if k not in all_keywords:
+                    all_keywords[k] = 1
+                else:
+                    all_keywords[k] += 1
+            all_keywords_non_unique += len(found_paper.keywords)
+
+#print(all_keywords)
+#print(all_keywords_non_unique)
+import operator
+sorted_keywords = sorted(all_keywords.items(), key=operator.itemgetter(1))
+with codecs.open(work_dir + '/keywords.txt', 'w', 'utf-8-sig') as f:
+    for t in sorted_keywords:
+        if (t[1] > 1):
+            f.write('' + t[0] + ' ' + str(t[1]) + '\n')
 
 class PaperDictionary(dict):
     def __init__(self,*arg,**kw):
@@ -129,9 +158,8 @@ for k, p in all_papers.iteritems():
             all_papers_in_siggraph[p.year] += [p]
         except:
             all_papers_in_siggraph[p.year] = [p]
-
-# parse the keywords
-
+        # filter all keywords that does not appear at least twice
+        p.keywords = filter(lambda x: all_keywords[x] > 1, p.keywords)
 
 with open(work_dir + '/' + 'all_papers.json', 'w') as f:
     f.write(all_papers_in_siggraph.to_JSON())
