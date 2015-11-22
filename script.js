@@ -34,6 +34,10 @@ function getCitedCount(data) {return data.cited_count;}
  * @param {{references:[]}} data
  */
 function getReferences(data) {return data.references;}
+/**
+ * @param {{authors:[]}} data
+ */
+function getAuthors(data) {return data.authors;}
 
 function getMaxCitations() {
     maxPaperCitations = [];
@@ -187,7 +191,13 @@ function updateYearBar() {
         //})
         .call(zoomListener);
 
+
+
     svgGroup = baseSvg.append("g");
+
+    var div =  d3.select("#pView").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
 
     var year;
     for (year in paperData) {
@@ -328,11 +338,23 @@ function updateYearBar() {
                         updateText();
                         d3.event.stopPropagation();
                     })
-                    .on("mouseover", function () {
+                    .on("mouseover", function(d) {
 
+                        div.transition()
+                            .duration(200)
+                            .style("opacity", .9);
+
+                        var authorsList = "";
+                        for (var i = 0; i < Math.min(getAuthors(d).length, 4); i++)
+                            authorsList += d.authors[i]+ "<br/>";
+                        div	.html( (d.title) + "<p style=\"font-size:8px\">" +authorsList + "<\p>")
+                            .style("left", (d3.event.pageX) + "px")
+                            .style("top", (d3.event.pageY - 28) + "px");
                     })
-                    .on("mouseout", function () {
-
+                    .on("mouseout", function() {
+                        div.transition()
+                            .duration(500)
+                            .style("opacity", 0);
                     })
                 ;
 
