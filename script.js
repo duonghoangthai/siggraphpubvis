@@ -2,11 +2,9 @@
 // These are helpers for those using JSHint
 
 var paperData,
-    selectedYear,
     selectedPaper,
     references,
     citedBy,
-    selectedYearPaperBackup,
     maxPaperCitationOnSelected,
     maxPaperCitation,
     maxPaperCitations,
@@ -67,70 +65,10 @@ function getMaxCitations() {
     }
 }
 
-function updateSelectedPaperMaxCitations() {
-    maxPaperCitations = [];
-    maxPaperCitedAndCitations = [];
-    maxPaperCitation = 0;
-    for (var year = 2002; year < 2016; year++) {
-        if (paperData.hasOwnProperty(year.toString())) {
-            (function () {
-                var maxCitation = 0;
-                var i;
-                for (i = 0; i < paperData[year].length; i++)
-                    maxCitation = Math.max(maxCitation, getCitedCount(paperData[year][i]));
-
-                maxPaperCitations.push(maxCitation);
-                maxPaperCitation = Math.max(maxPaperCitation, maxCitation);
-
-                var maxCitedAndCitation = 0;
-                for (i = 0; i < paperData[year].length; i++) {
-                    var sum = paperData[year][i].cited_by.length + getReferences(paperData[year][i]).length;
-                    maxCitedAndCitation = Math.max(maxCitedAndCitation, sum);
-                }
-
-                maxPaperCitedAndCitations.push(maxCitedAndCitation);
-            })();
-        }
-    }
-}
-
 // get cite_by and references from selected papaer to global variables
 function getCitations() {
     references = selectedPaper.references;
     citedBy = getCitedBy(selectedPaper);
-}
-
-// back up select year papers to selectedYearPaperBackup
-function backupSelectedYear() {
-    selectedYearPaperBackup = [];
-    if (selectedYear) {
-        for (var i = 0; i < paperData[selectedYear].length; i++) {
-            selectedYearPaperBackup.push(paperData[selectedYear][i]);
-        }
-    }
-}
-
-// sort select year papers based on the order of reference, self, cited_by, and others
-function sortSelectedYear() {
-    var local_references = [];
-    var local_cited_by = [];
-    var paper_self= [];
-    var others = [];
-
-    if (selectedPaper != null) {
-        // classify papers in for selected year
-        for (var i = 0; i < selectedYearPaperBackup.length; i++) {
-            if (selectedYearPaperBackup[i].title == selectedPaper[0][0].__data__.title)
-                paper_self.push(selectedPaper[0][0].__data__);
-            else if (references.indexOf(selectedYearPaperBackup[i].id) > -1)
-                local_references.push(selectedYearPaperBackup[i]);
-            else if (citedBy.indexOf(selectedYearPaperBackup[i].id) > -1)
-                local_cited_by.push(selectedYearPaperBackup[i]);
-            else
-                others.push(selectedYearPaperBackup[i]);
-        }
-        paperData[selectedYear] = local_cited_by.concat(paper_self, local_references, others);
-    }
 }
 
 function updateYearBar() {
@@ -305,7 +243,7 @@ function updateYearBar() {
                         if (d.title.length < 50) return d;
                         else return d.title.substring(0, 47) + '...';
                     })
-                    .attr("font-family", "Helvetica Neue")
+                    .style("font-weight", "normal")
                     .attr("font-size", function (d) {
                         if (selectedPaper) {
                             if (d.title == selectedPaper[0][0].__data__.title)
@@ -321,12 +259,12 @@ function updateYearBar() {
                     })
                     .attr("fill", function (d) {
                         if (selectedPaper) {
-                            if (d.title === selectedPaper[0][0].__data__.title) return 'black';
-                            if (references.indexOf(d.id) > -1) return 'red';
-                            if (citedBy.indexOf(d.id) > -1) return 'blue';
-                            return 'lightgrey';
+                            if (d.title === selectedPaper[0][0].__data__.title) return 'Black';
+                            if (references.indexOf(d.id) > -1) return 'Red';
+                            if (citedBy.indexOf(d.id) > -1) return 'Blue';
+                            return 'LightGrey';
                         } else {
-                            return 'black';
+                            return 'Black';
                         }
                     })
                     .on("click", function() {
@@ -337,6 +275,9 @@ function updateYearBar() {
                         selectedPaper = d3.select(this)[0][0].__data__;
                         getCitations();
                         updateText();
+
+                        updatePaperDetails();
+
                         d3.event.stopPropagation();
                     })
                     .on("mouseover", function(d) {
@@ -345,27 +286,36 @@ function updateYearBar() {
                             .duration(200)
                             .style("opacity", .7);
 
+                        var span10 = "<span style=\"padding-left:10px\"></span>";
+
                         var authorsList = "";
-                        for (var i = 0; i < Math.min(getAuthors(d).length, 4); i++)
-                            authorsList += d.authors[i]+ "<br/>";
-                        div	.html( (d.title) + "<p style=\"font-size:8px\">" +authorsList + "<\p>")
+                        for (var i = 0; i < getAuthors(d).length; i++) {
+                            authorsList += d.authors[i] + span10;
+                            if ((i+1)%3 == 0)
+                                authorsList += '<br/>';
+                        }
+
+                        var colorText;
+                        if (searchResult) {
+                            if (d.isTarget) colorText ='Black';
+                            else colorText = 'DarkGrey';
+                        } else if (selectedPaper) {
+                            if (d.title === selectedPaper.title) colorText = 'Black';
+                            else if (citedBy.indexOf(d.id) > -1) colorText = 'ForestGreen';
+                            else if (references.indexOf(d.id) > -1) colorText = 'DodgerBlue';
+                            else colorText =  'DarkGrey';
+                        } else {
+                            colorText = 'Black'
+                        }
+
+                        div	.html( "<p style=\"color:" + colorText + "\">" + (d.title) +
+                            "<\p> <p style=\"font-size:8px; color:" + colorText + "\">" +authorsList + "<\p>")
                             .style("left", (d3.event.pageX) + "px")
                             .style("top", (d3.event.pageY - 28) + "px")
-                            .style("background", function() {
-                                if (searchResult) {
-                                    if (d.isTarget) return 'darkgrey';
-                                    else return 'lightgrey'
-                                }
-                                if (selectedPaper) {
-                                    if (d.title === selectedPaper.title) return 'orangered';
-                                    if (citedBy.indexOf(d.id) > -1) return 'forestGreen';
-                                    if (references.indexOf(d.id) > -1) return 'dodgerblue';
-                                    return 'lightgrey';
-                                } else {
-                                    return 'lightgrey';
-                                }
-                            })
+                            .style("background", 'LightGrey')
                         ;
+
+                        console.log(div);
                     })
                     .on("mouseout", function() {
                         div.transition()
@@ -378,12 +328,12 @@ function updateYearBar() {
                     .duration(500)
                     .style("fill", function (d) {
                         if (selectedPaper) {
-                            if (d.title === selectedPaper[0][0].__data__.title) return 'black';
-                            if (references.indexOf(d.id) > -1) return 'orangered';
+                            if (d.title === selectedPaper[0][0].__data__.title) return 'Black';
+                            if (references.indexOf(d.id) > -1) return 'OrangeRed';
                             if (citedBy.indexOf(d.id) > -1) return 'DarkGreen';
                             return 'none';
                         } else {
-                            return 'black';
+                            return 'Black';
                         }
                     })
                     .attr("font-size", function (d) {
@@ -449,6 +399,7 @@ d3.json("Data/all_papers_cited_count.json", function (error, loadedData) {
     getMaxCitations();
 
     updateYearBar();
+    updatePaperDetails();
 
     d3.select("#citationCheckbox").on("change", showCitation);
 });
@@ -458,7 +409,7 @@ function updateText() {
     citedPaperPos = [];
     var j = 0;
     var obj;
-    var citationScale;
+    //var citationScale;
     for (var year = 2015; year > 2001; year--) {
         if (paperData.hasOwnProperty(year.toString())) {
             (function () {
@@ -469,7 +420,7 @@ function updateText() {
                 //        .domain([0, maxPaperCitationOnSelected])
                 //        .range([0, dWidth - 10]);
                 //} else {
-                    citationScale = d3.scale.linear()
+                    var citationScale = d3.scale.linear()
                         .domain([0, maxPaperCitations[year - 2002]])
                         .range([0, dWidth - 10]);
                 //}
@@ -488,12 +439,12 @@ function updateText() {
                         }
 
                         if (selectedPaper) {
-                            if (d.title === selectedPaper.title) return 'black';
-                            if (citedBy.indexOf(d.id) > -1) return 'forestGreen';
-                            if (references.indexOf(d.id) > -1) return 'dodgerblue';
-                            return 'lightgrey';
+                            if (d.title === selectedPaper.title) return 'Black';
+                            if (citedBy.indexOf(d.id) > -1) return 'ForestGreen';
+                            if (references.indexOf(d.id) > -1) return 'DodgerBlue';
+                            return 'LightGrey';
                         } else {
-                            return 'black';
+                            return 'Black';
                         }
                     })
                     .text(function (d) {
@@ -651,7 +602,7 @@ function searchTitle() {
                 for (i = 0; i < paperData[year].length; i++)
                     if(paperData[year][i].title.match(target)) {
                         searchResult.push(paperData[year][i]);
-                        maxPaperCitationOnSelected = Math.max(paperData[year][i].cited_count, maxPaperCitationOnSelected);
+                        maxPaperCitationOnSelected = Math.max(getCitedCount(paperData[year][i]), maxPaperCitationOnSelected);
                         paperData[year][i]['isTarget'] = true;
                     } else {
                         paperData[year][i]['isTarget'] = false;
@@ -695,4 +646,32 @@ function clearSelectedPaper() {
     references = [];
     citedBy = [];
     updateText();
+}
+
+function updatePaperDetails() {
+
+    d3.select("#pDetails").selectAll("div").remove();
+
+    var sampleAbstract = "Despite the visual importance of hair and the attention paid to hair modeling in the graphics research, modeling realistic hair still remains a very challenging task that can be performed by very few artists. In this paper we present hair meshes, a new method for modeling hair that aims to bring hair modeling as close as possible to modeling polygonal surfaces. This new approach provides artists with direct control of the overall shape of the hair, giving them the ability to model the exact hair shape they desire. We use the hair mesh structure for modeling the hair volume with topological constraints that allow us to automatically and uniquely trace the path of individual hair strands through this volume. We also define a set of topological operations for creating hair meshes that maintain these constraints. Furthermore, we provide a method for hiding the volumetric structure of the hair mesh from the end user, thus allowing artists to concentrate on manipulating the outer surface of the hair as a polygonal surface. We explain and show examples of how hair meshes can be used to generate individual hair strands for a wide variety of realistic hair styles."
+
+    var div =  d3.select("#pDetails").append("div");
+    var span20 = "<span style=\"padding-left:20px\"></span>";
+    if (selectedPaper) {
+        var authorsList = selectedPaper.authors[0];
+        for (var i = 1; i < getAuthors(selectedPaper).length; i++)
+            authorsList += ( span20 + selectedPaper.authors[i]);
+
+        div.html(
+            "<h1>" + (selectedPaper.title) + "</h1>" +
+            "<p>" + (authorsList) + "</p>" +
+            "<h3> Abstract </h3>" +
+            "<p  align=\"left\">" + (sampleAbstract) + "</p>" +
+            "<p  align=\"left\">" + "Keywords:" + "</p>" +
+            "<p  align=\"left\">" + "Year: "+ selectedPaper.year + span20 + "Cited by " + selectedPaper.cited_count + "</p>" +
+            "<p  align=\"left\">" + "External Link: " +
+            "<a href=\"" + selectedPaper.link + "\">" + selectedPaper.link + "</a></p>"
+        );
+    } else {
+        div.html("<h1>" + "No paper selected" + "</h1>");
+    }
 }
