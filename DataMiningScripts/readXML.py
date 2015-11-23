@@ -4,6 +4,7 @@ import xml.etree.ElementTree as etree
 import json
 from json import JSONEncoder
 import codecs
+import collections
 
 class Paper(JSONEncoder):
     def __init__(self):
@@ -16,7 +17,7 @@ class Paper(JSONEncoder):
         self.keywords = []
 
 all_papers = {}
-all_keywords = {}
+keyword_occurences = collections.defaultdict(int)
 
 # remove all non-alphanumeric characters in the title, and turn all characters into lowercase
 def normalize_title(input):
@@ -49,7 +50,6 @@ for dir in next(os.walk(work_dir))[1]:
             print (e)
 
 paper_in_siggraph = {}
-all_keywords_non_unique = 0
 
 # we need to replace all the weird characters by space ' ', then trim the spaces, then make every
 # character lowercase
@@ -114,31 +114,21 @@ for dir in next(os.walk(work_dir))[1]:
             keywords_from_paper = keywords_from_paper.split()
 
             # normalize the keywords
-            keywords_dict = {}
+            keywords_set = set()
             for kw in keywords_array:
                 if float(kw['relevance']) >= 0.7: # skip keywords whose relevance is low
                     temp = "".join([c.lower() if c.isalnum() else " " for c in kw['text']])
                     temp = temp.split()
                     for k in temp:
-                        keywords_dict[k] = True
+                        keywords_set.add(k)
                 for k in keywords_from_paper:
-                    keywords_dict[k] = True
-            for k, _ in keywords_dict.iteritems():
-                found_paper.keywords += [k]
-                if k not in all_keywords:
-                    all_keywords[k] = 1
-                else:
-                    all_keywords[k] += 1
-            all_keywords_non_unique += len(found_paper.keywords)
+                    keywords_set.add(k)
+            for k in keywords_set:
+                found_paper.keywords.append(k)
+                keyword_occurences[k] += 1
 
-#print(all_keywords)
-#print(all_keywords_non_unique)
-import operator
-sorted_keywords = sorted(all_keywords.items(), key=operator.itemgetter(1))
-with codecs.open(work_dir + '/keywords.txt', 'w', 'utf-8-sig') as f:
-    for t in sorted_keywords:
-        if (t[1] > 1):
-            f.write('' + t[0] + ' ' + str(t[1]) + '\n')
+#print(keyword_occurences)
+#print(keyword_occurences_non_unique)
 
 class PaperDictionary(dict):
     def __init__(self,*arg,**kw):
@@ -147,19 +137,82 @@ class PaperDictionary(dict):
     def to_JSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
+# read the banned keywords file
+banned_keywords = set()
+with open(work_dir + '/' + 'banned_keywords.txt') as f:
+    for word in f.read().split():
+        banned_keywords.add(word)
+
+import operator
+sorted_keywords = sorted(keyword_occurences.items(), key=operator.itemgetter(1))
+with codecs.open(work_dir + '/keywords.txt', 'w', 'utf-8-sig') as f:
+    for t in sorted_keywords:
+        if t[0] not in banned_keywords and t[1] > 1:
+                f.write('' + t[0] + ' ' + str(t[1]) + '\n')
+
+keyword_pair_set = set() # set of all keyword-keyword pairs
+keyword_paper_map = collections.defaultdict(list)
+
 # remove all papers that are not in siggraph
 all_papers_in_siggraph = PaperDictionary()
 for k, p in all_papers.iteritems():
     in_siggraph = paper_in_siggraph.get(normalize_title(p.title))
     if in_siggraph is not None:
-        if p.title.endswith('.'):
+        if p.title.endswith('.'): # remove the dot (.) at the end of paper's title
             p.title = p.title[:-1]
-        try:
-            all_papers_in_siggraph[p.year] += [p]
-        except:
-            all_papers_in_siggraph[p.year] = [p]
+        all_papers_in_siggraph.setdefault(p.year, []).append(p)
         # filter all keywords that does not appear at least twice
-        p.keywords = filter(lambda x: all_keywords[x] > 1, p.keywords)
+        p.keywords = filter(lambda x: keyword_occurences[x] > 1 and x not in banned_keywords, p.keywords)
+        # populate keyword-keyword map and keyword-paper map
+        for k1 in p.keywords:
+            for k2 in p.keywords:
+                if k2 > k1:
+                    keyword_pair_set.add((k1, k2))
+            keyword_paper_map[k1].append(p.id)
+
+keyword_occurences = filter(lambda x: keyword_occurences[x] > 1 and x not in banned_keywords, keyword_occurences)
+keyword_id = {} # map a keyword to its id
+kid = 0
+for k in keyword_occurences:
+    keyword_id[k] = kid
+    kid += 1
+
+# a Vertex is a keyword
+class Vertex:
+    def __init__(self):
+        self.id = 0
+        self.text = ""
+        self.papers = []
+
+# an Edge connects two keywords
+class Edge:
+    def __init__(self):
+        self.first = 0
+        self.second = 0
+
+# keyword graph
+class Graph(JSONEncoder):
+    def __init__(self):
+        self.vertices = []
+        self.edges = []
+
+# build the keyword graph
+keyword_graph = Graph()
+for k, i in keyword_id.iteritems():
+    v = Vertex()
+    v.id = i
+    v.text = k
+    v.papers = keyword_paper_map[k]
+    keyword_graph.vertices.append(v)
+
+for (k1, k2) in keyword_pair_set:
+    e = Edge()
+    e.first = keyword_id[k1]
+    e.second = keyword_id[k2]
+    keyword_graph.edges.append(e)
+
+with open(work_dir + '/' + 'keyword_graph.json', 'w') as f:
+    json.dump(keyword_graph, f, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
 with open(work_dir + '/' + 'all_papers.json', 'w') as f:
     f.write(all_papers_in_siggraph.to_JSON())
