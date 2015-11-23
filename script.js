@@ -7,6 +7,7 @@ var paperData,
     references,
     citedBy,
     selectedYearPaperBackup,
+    maxPaperCitationOnSelected,
     maxPaperCitation,
     maxPaperCitations,
     maxPaperCitedAndCitations,
@@ -342,14 +343,29 @@ function updateYearBar() {
 
                         div.transition()
                             .duration(200)
-                            .style("opacity", .9);
+                            .style("opacity", .7);
 
                         var authorsList = "";
                         for (var i = 0; i < Math.min(getAuthors(d).length, 4); i++)
                             authorsList += d.authors[i]+ "<br/>";
                         div	.html( (d.title) + "<p style=\"font-size:8px\">" +authorsList + "<\p>")
                             .style("left", (d3.event.pageX) + "px")
-                            .style("top", (d3.event.pageY - 28) + "px");
+                            .style("top", (d3.event.pageY - 28) + "px")
+                            .style("background", function() {
+                                if (searchResult) {
+                                    if (d.isTarget) return 'darkgrey';
+                                    else return 'lightgrey'
+                                }
+                                if (selectedPaper) {
+                                    if (d.title === selectedPaper.title) return 'orangered';
+                                    if (citedBy.indexOf(d.id) > -1) return 'forestGreen';
+                                    if (references.indexOf(d.id) > -1) return 'dodgerblue';
+                                    return 'lightgrey';
+                                } else {
+                                    return 'lightgrey';
+                                }
+                            })
+                        ;
                     })
                     .on("mouseout", function() {
                         div.transition()
@@ -442,14 +458,22 @@ function updateText() {
     citedPaperPos = [];
     var j = 0;
     var obj;
-    //var citationScale;
+    var citationScale;
     for (var year = 2015; year > 2001; year--) {
         if (paperData.hasOwnProperty(year.toString())) {
             (function () {
                 var xOffset = 13 - j;
-                var citationScale = d3.scale.linear()
-                    .domain([0, maxPaperCitations[year-2002]])
-                    .range([0, dWidth - 10]);
+
+                //if (searchResult) {
+                //    citationScale = d3.scale.linear()
+                //        .domain([0, maxPaperCitationOnSelected])
+                //        .range([0, dWidth - 10]);
+                //} else {
+                    citationScale = d3.scale.linear()
+                        .domain([0, maxPaperCitations[year - 2002]])
+                        .range([0, dWidth - 10]);
+                //}
+
                 var barId = "#b" + year;
                 var currentData = paperData[year];
                 svgGroup.select(barId)
@@ -618,6 +642,7 @@ function searchTitle() {
     references = [];
     citedBy = [];
     searchResult = [];
+    maxPaperCitationOnSelected = 0;
     var target = new RegExp(searchTarget, "i");
     for (var year = 2002; year < 2016; year++) {
         if (paperData.hasOwnProperty(year.toString())) {
@@ -626,6 +651,7 @@ function searchTitle() {
                 for (i = 0; i < paperData[year].length; i++)
                     if(paperData[year][i].title.match(target)) {
                         searchResult.push(paperData[year][i]);
+                        maxPaperCitationOnSelected = Math.max(paperData[year][i].cited_count, maxPaperCitationOnSelected);
                         paperData[year][i]['isTarget'] = true;
                     } else {
                         paperData[year][i]['isTarget'] = false;
@@ -643,13 +669,15 @@ function searchTitle() {
         searchResult = null;
 
     /// only on matching paper, set it as selected paper
-    if (searchResult.length == 1) {
+    else if (searchResult.length == 1) {
         selectedPaper = searchResult[0];
         getCitations();
         searchResult = null;
     }
 
     updateText();
+
+    //console.log(maxPaperCitationOnSelected);
 }
 
 function showCitation() {
