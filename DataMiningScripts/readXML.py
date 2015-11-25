@@ -198,14 +198,14 @@ keyword_paper_map = collections.defaultdict(list)
 
 # remove all papers that are not in siggraph
 all_papers_in_siggraph = PaperDictionary()
-all_papers_in_siggraph_abstract = PaperDictionary()
+all_papers_in_siggraph_abstract = []
 for k, p in all_papers.iteritems():
     in_siggraph = paper_in_siggraph.get(normalize_title(p.title))
+    paper_abs = all_papers_abstract[normalize_title(p.title)]
     if in_siggraph is not None:
         if p.title.endswith('.'): # remove the dot (.) at the end of paper's title
             p.title = p.title[:-1]
         all_papers_in_siggraph.setdefault(p.year, []).append(p)
-        all_papers_in_siggraph_abstract.setdefault(p.year, []).append(all_papers_abstract[normalize_title(p.title)])
         # filter all keywords that does not appear at least twice
         p.keywords = filter(lambda x: keyword_occurences[x] > 1 and x not in banned_keywords, p.keywords)
         # populate keyword-keyword map and keyword-paper map
@@ -214,6 +214,10 @@ for k, p in all_papers.iteritems():
                 if k2 > k1:
                     keyword_pair_set.add((k1, k2))
             keyword_paper_map[k1].append(p.id)
+    else:
+        paper_abs.abstract=""
+    all_papers_in_siggraph_abstract.append(paper_abs)
+all_papers_in_siggraph_abstract.sort(key=lambda x: x.id)
 
 keyword_occurences = filter(lambda x: keyword_occurences[x] > 1 and x not in banned_keywords, keyword_occurences)
 keyword_id = {} # map a keyword to its id
@@ -263,7 +267,7 @@ with open(work_dir + '/' + 'all_papers.json', 'w') as f:
     f.write(all_papers_in_siggraph.to_JSON())
 
 with codecs.open(work_dir + '/' + 'all_papers_abs.json', 'w', 'utf-8-sig') as f:
-    f.write(all_papers_in_siggraph_abstract.to_JSON())
+    json.dump(all_papers_in_siggraph_abstract, f, default=lambda o: o.__dict__, indent=4)
 #for year, paper_list in all_papers_in_siggraph_abstract.iteritems():
 #    for paper in paper_list:
 #        print(paper.abstract.encode('utf8').decode('ascii'))
