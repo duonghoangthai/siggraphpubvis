@@ -15,6 +15,7 @@ var paperData,
     svgGroup,
     fontSize = 2,
     titleBegin = 470,
+    subTitleBegin = 100,
     dWidth,
     show_Citation = -1,
     referencePaperPos = [],
@@ -250,7 +251,7 @@ function updateYearBar() {
                 selection.enter().append("text")
                     .attr("style", "cursor: pointer")
                     .text(function (d) {
-                        if (d.title.length < 50) return d;
+                        if (d.title.length < 50) return d.title;
                         else return d.title.substring(0, 47) + '...';
                     })
                     .style("font-weight", "normal")
@@ -285,9 +286,8 @@ function updateYearBar() {
                         selectedPaper = d3.select(this)[0][0].__data__;
                         getCitations();
                         updateText();
-
                         updatePaperDetails();
-
+                        updateSubPaperView();
                         d3.event.stopPropagation();
                     })
                     .on("mouseover", function(d) {
@@ -338,7 +338,7 @@ function updateYearBar() {
                     .duration(500)
                     .style("fill", function (d) {
                         if (selectedPaper) {
-                            if (d.title === selectedPaper[0][0].__data__.title) return 'Black';
+                            if (d.title === selectedPaper.title) return 'Black';
                             if (references.indexOf(d.id) > -1) return 'OrangeRed';
                             if (citedBy.indexOf(d.id) > -1) return 'DarkGreen';
                             return 'none';
@@ -348,7 +348,7 @@ function updateYearBar() {
                     })
                     .attr("font-size", function (d) {
                         if (selectedPaper) {
-                            if (d.title == selectedPaper[0][0].__data__.title ||
+                            if (d.title == selectedPaper.title ||
                                 references.indexOf(d.id) > -1 ||
                                 citedBy.indexOf(d.id) > -1)
                                 return (fontSize + 8) + "px";
@@ -359,7 +359,7 @@ function updateYearBar() {
                     })
                     .attr("transform", function (d, i) {
                         if (selectedPaper) {
-                            if (d.title == selectedPaper[0][0].__data__.title ||
+                            if (d.title == selectedPaper.title ||
                                 references.indexOf(d.id) > -1 ||
                                 citedBy.indexOf(d.id) > -1) {
                                 highlight_PaperIdx = highlight_PaperIdx + 1;
@@ -524,8 +524,8 @@ function updateText() {
                     .duration(500)
                     .style("fill", function (d) {
                         if (searchResult) {
-                            if (d.isTarget) return 'black';
-                            else return 'lightgrey'
+                            if (d.isTarget) return 'Black';
+                            else return 'LightGrey'
                         }
 
                         if (selectedPaper) {
@@ -815,5 +815,129 @@ function updatePaperDetails() {
         );
     } else {
         div.html("<h1>" + "No paper selected" + "</h1>");
+    }
+}
+
+function updateSubPaperView() {
+
+    d3.select("#pSubView").selectAll("svg").remove();
+
+    var fisheye = d3.fisheye.circular()
+        .radius(100)
+        .distortion(10);
+
+    d3.select("#pSubView")
+        .on("mousemove", function() {
+            fisheye.focus(d3.mouse(this));
+            var titles = d3.selectAll(".subTitle")
+                    .each(function(d) {})
+                    .attr("transform", function (d) {
+                        var pos = {
+                            x:d3.transform(this.getAttribute("transform")).translate[0]+22.5,
+                            y:d3.transform(this.getAttribute("transform")).translate[1]
+                        };
+                        var feye = fisheye(pos);
+                        return "translate("+ (pos.x-22.5) +","+ pos.y
+                            +")"+"scale(" + feye.z+","+ feye.z+")"
+                            ;
+                    })
+                ;
+        });
+
+
+
+    // Draw axis
+    var xAxisWidth = 1240;
+    var length = 0;
+
+    var baseSvg = d3.select("#pSubView").append("svg")
+        .attr("width", xAxisWidth)
+        .attr("height", subTitleBegin+50);
+
+    var subSvgGroup = baseSvg.append("g");
+
+    var year;
+    for (year in paperData) length++;
+
+    dWidth = xAxisWidth / (length + 1);
+    var dateList = [];
+    var dateRange = [];
+
+    dateList.push("");
+    dateRange.push(0);
+    var i = 1;
+    for (year in paperData) {
+        if (paperData.hasOwnProperty(year)) {
+            dateList.push(year);
+            dateRange.push(dWidth * i);
+            i++;
+        }
+    }
+    dateList.push("");
+    dateRange.push(dWidth * (i+1));
+
+    var dScale = d3.scale.ordinal()
+            .domain(dateList)
+            .range(dateRange);
+
+    var dAxis = d3.svg.axis()
+            .scale(dScale)
+            .orient("bottom")
+            .outerTickSize(0);
+
+    subSvgGroup.append("g")
+        .attr("class", "axis")
+        .call(dAxis)
+        .attr("transform", function () {
+            return "translate(-45," + subTitleBegin + ")"
+        });
+
+    //var barId, rectId;
+    var selection;
+    var citationScale;
+    var j = 0;
+    for (year = 2015; year > 2001; year--) {
+        if (paperData.hasOwnProperty(year.toString())) {
+            (function () {
+                citationScale = d3.scale.linear()
+                    .domain([0, maxPaperCitations[year-2002]])
+                    .range([0, dWidth - 10]);
+
+                var xOffset = 13 - j;
+                var barId = "sub_b" + year;
+                var currentData = paperData[year];
+                var validTitleCount = -4;
+
+                selection = subSvgGroup.append("g")
+                    .attr("id", function () {return barId;})
+                    .selectAll("text")
+                    .data(currentData);
+
+                selection.enter().append("text")
+                    .attr('class','subTitle')
+                    .attr("style", "cursor: default")
+                    .text(function (d) {return d.title;})
+                    .style("font-weight", "normal")
+                    .attr("font-size", function () {return fontSize + "px";})
+                    .attr("transform", function (d) {
+                        if (d.title === selectedPaper.title || citedBy.indexOf(d.id) > -1 || references.indexOf(d.id) > -1 ) {
+                            validTitleCount += 5;
+                            return "translate(" + ((xOffset + 1) * dWidth - 15 - 30) + ","
+                                + (subTitleBegin - 0.5 * fontSize - (validTitleCount) * (fontSize + 0.5)) + ")"
+                        } else
+                            return "translate(0,0)";
+                    })
+                    .style("fill", function (d) {
+                        if (selectedPaper) {
+                            if (d.title === selectedPaper.title) return 'Black';
+                            if (citedBy.indexOf(d.id) > -1) return 'ForestGreen';
+                            if (references.indexOf(d.id) > -1) return 'DodgerBlue';
+                            return 'none';
+                        }
+                    })
+                ;
+                j++
+            })();
+        }
     }
 }
