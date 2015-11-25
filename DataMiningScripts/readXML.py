@@ -5,6 +5,7 @@ import json
 from json import JSONEncoder
 import codecs
 import collections
+import unicodedata
 
 class Paper(JSONEncoder):
     def __init__(self):
@@ -16,7 +17,14 @@ class Paper(JSONEncoder):
         self.cited_by = []
         self.keywords = []
 
+class PaperAbstract(JSONEncoder):
+    def __init__(self):
+        self.id = 0
+        self.title = ""
+        self.abstract = ""
+
 all_papers = {}
+all_papers_abstract = {}
 keyword_occurences = collections.defaultdict(int)
 
 # remove all non-alphanumeric characters in the title, and turn all characters into lowercase
@@ -45,6 +53,11 @@ for dir in next(os.walk(work_dir))[1]:
                 paper.year = article.find('year').text
                 paper.link = article.find('ee').text
                 all_papers[normalize_title(paper.title)] = paper
+                # deal with the abstract
+                paper_abs = PaperAbstract()
+                paper_abs.id = paper.id
+                paper_abs.title = paper.title
+                all_papers_abstract[normalize_title(paper.title)] = paper_abs
         except Exception as e:
             print ('Exception in file ' + file)
             print (e)
@@ -74,6 +87,36 @@ for dir in next(os.walk(work_dir))[1]:
                         continue
                     else:
                         paper_in_siggraph[normalize_title(title.text)] = 1
+                    # deal with the paper abstract
+                    abstract = ""
+                    begin_abstract = False
+                    for line in open(work_dir + '/' + dir + '/' + file[:-14] + 'pdf.txt', 'r'):
+                        line = line.rstrip('\n')
+                        stop = ['CR Categories', 'CR CATEGORIES', 'Categories', 'CATEGORIES', 'Keywords', 'KEYWORDS', '1 Introduction', '1 INTRODUCTION', '1. Introduction', '1. INTRODUCTION']
+                        if not begin_abstract and (line.startswith('Abstract') or line.startswith('ABSTRACT')):
+                            begin_abstract = True
+                        else:
+                            should_stop = False
+                            for s in stop:
+                                if line.startswith(s):
+                                    should_stop = True
+                                    break
+                            if should_stop:
+                                break
+                        if begin_abstract:
+                            abstract += line + ' '
+                    if len(abstract) < 20: # if cannot find the abstract from the paper, try the header
+                        abstract_node = root[0][0].find('abstract')
+                        if abstract_node is not None:
+                            abstract = abstract_node.text.encode('iso-8859-1', 'ignore')
+                    stop = ['CR Categories', 'CR CATEGORIES', 'Categories', 'CATEGORIES', 'Keywords', 'KEYWORDS', '1 Introduction', '1 INTRODUCTION', '1. Introduction', '1. INTRODUCTION']
+                    for x in stop:
+                        find = abstract.find(x)
+                        if find != -1:
+                            abstract = abstract[:find]
+                    if abstract.startswith('Abstract') or abstract.startswith('ABSTRACT'):
+                        abstract = abstract[9:]
+                    all_papers_abstract[normalize_title(title.text)].abstract = abstract.decode("utf8", "ignore")
                 except Exception as e:
                     print ('Exception in file ' + file)
                     print (e)
@@ -155,12 +198,14 @@ keyword_paper_map = collections.defaultdict(list)
 
 # remove all papers that are not in siggraph
 all_papers_in_siggraph = PaperDictionary()
+all_papers_in_siggraph_abstract = PaperDictionary()
 for k, p in all_papers.iteritems():
     in_siggraph = paper_in_siggraph.get(normalize_title(p.title))
     if in_siggraph is not None:
         if p.title.endswith('.'): # remove the dot (.) at the end of paper's title
             p.title = p.title[:-1]
         all_papers_in_siggraph.setdefault(p.year, []).append(p)
+        all_papers_in_siggraph_abstract.setdefault(p.year, []).append(all_papers_abstract[normalize_title(p.title)])
         # filter all keywords that does not appear at least twice
         p.keywords = filter(lambda x: keyword_occurences[x] > 1 and x not in banned_keywords, p.keywords)
         # populate keyword-keyword map and keyword-paper map
@@ -216,6 +261,12 @@ with open(work_dir + '/' + 'keyword_graph.json', 'w') as f:
 
 with open(work_dir + '/' + 'all_papers.json', 'w') as f:
     f.write(all_papers_in_siggraph.to_JSON())
+
+with codecs.open(work_dir + '/' + 'all_papers_abs.json', 'w', 'utf-8-sig') as f:
+    f.write(all_papers_in_siggraph_abstract.to_JSON())
+#for year, paper_list in all_papers_in_siggraph_abstract.iteritems():
+#    for paper in paper_list:
+#        print(paper.abstract.encode('utf8').decode('ascii'))
 
 # write a text file containing all the papers' titles
 with codecs.open(work_dir + '/' + 'paper_titles.txt', 'w', 'utf-8-sig') as f:
