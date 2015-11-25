@@ -9,8 +9,9 @@ var paperData,
     maxPaperCitation,
     maxPaperCitations,
     maxPaperCitedAndCitations,
-    searchTarget,
+    searchTitleTarget,
     searchResult,
+    searchAuthorTarget,
     svgGroup,
     fontSize = 2,
     titleBegin = 470,
@@ -112,12 +113,13 @@ function updateYearBar() {
     var xAxisWidth = 1240;
     var length = 0;
 
+    var zoomListener = d3.behavior.zoom()
+        .center([xAxisWidth / 2, (titleBegin+50) / 2])
+        .scaleExtent([1, 5]).on("zoom", zoom);
+
     function zoom() {
-        console.log("zoom");
         svgGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
     }
-
-    var zoomListener = d3.behavior.zoom().scaleExtent([1, 5]).on("zoom", zoom);
 
     var baseSvg = d3.select("#pView").append("svg")
         .attr("width", xAxisWidth)
@@ -130,7 +132,15 @@ function updateYearBar() {
         //})
         .call(zoomListener);
 
+    function coordinates(point) {
+        var scale = zoomListener.scale(), translate = zoomListener.translate();
+        return [(point[0] - translate[0]) / scale, (point[1] - translate[1]) / scale];
+    }
 
+    function point(coordinates) {
+        var scale = zoomListener.scale(), translate = zoomListener.translate();
+        return [coordinates[0] * scale + translate[0], coordinates[1] * scale + translate[1]];
+    }
 
     svgGroup = baseSvg.append("g");
 
@@ -315,7 +325,7 @@ function updateYearBar() {
                             .style("background", 'LightGrey')
                         ;
 
-                        console.log(div);
+                        //console.log(div);
                     })
                     .on("mouseout", function() {
                         div.transition()
@@ -385,6 +395,86 @@ function updateYearBar() {
             })();
         }
     }
+
+    function zoomIn() {
+        baseSvg.call(zoomListener.event); // https://github.com/mbostock/d3/issues/2387
+
+        // Record the coordinates (in data space) of the center (in screen space).
+        var center0 = zoomListener.center(),
+            translate0 = zoomListener.translate(),
+            coordinates0 = coordinates(center0);
+        zoomListener.scale(
+            Math.min(5, zoomListener.scale() * 2)
+        );
+
+        // Translate back to the center.
+        var center1 = point(coordinates0);
+        zoomListener.translate([translate0[0] + center0[0] - center1[0], translate0[1] + center0[1] - center1[1]]);
+
+        baseSvg.transition().duration(750).call(zoomListener.event);
+    }
+
+    function zoomOut() {
+        baseSvg.call(zoomListener.event); // https://github.com/mbostock/d3/issues/2387
+
+        // Record the coordinates (in data space) of the center (in screen space).
+        var center0 = zoomListener.center(),
+            translate0 = zoomListener.translate(),
+            coordinates0 = coordinates(center0);
+        zoomListener.scale(
+            Math.max(1, zoomListener.scale() * 0.5)
+        );
+
+        // Translate back to the center.
+        var center1 = point(coordinates0);
+        zoomListener.translate([translate0[0] + center0[0] - center1[0], translate0[1] + center0[1] - center1[1]]);
+
+        baseSvg.transition().duration(750).call(zoomListener.event);
+    }
+
+    baseSvg.append("rect")
+        .attr("rx", 3)
+        .attr("ry", 3)
+        .attr("x", 10)
+        .attr("y", 10)
+        .attr("width", 20)
+        .attr("height", 20)
+        .attr("fill", "white")
+        .attr("style", "cursor: pointer")
+        .style("stroke", "grey")
+        .style("stroke-width", 1)
+        .on('click', zoomIn)
+    ;
+
+    baseSvg.append("rect")
+        .attr("rx", 3)
+        .attr("ry", 3)
+        .attr("x", 10)
+        .attr("y", 32)
+        .attr("width", 20)
+        .attr("height", 20)
+        .attr("fill", "white")
+        .attr("style", "cursor: pointer")
+        .style("stroke", "grey")
+        .style("stroke-width", 1)
+        .on('click', zoomOut)
+    ;
+
+    baseSvg.append("text")
+        .attr("x", 16)
+        .attr("y", 25)
+        .attr("style", "cursor: pointer")
+        .text("+")
+        .on('click', zoomIn)
+    ;
+
+    baseSvg.append("text")
+        .attr("x", 18)
+        .attr("y", 47)
+        .attr("style", "cursor: pointer")
+        .text("-")
+        .on('click', zoomOut)
+    ;
 }
 
 /* DATA LOADING */
@@ -594,7 +684,7 @@ function searchTitle() {
     citedBy = [];
     searchResult = [];
     maxPaperCitationOnSelected = 0;
-    var target = new RegExp(searchTarget, "i");
+    var target = new RegExp(searchTitleTarget, "i");
     for (var year = 2002; year < 2016; year++) {
         if (paperData.hasOwnProperty(year.toString())) {
             (function () {
@@ -623,6 +713,7 @@ function searchTitle() {
     else if (searchResult.length == 1) {
         selectedPaper = searchResult[0];
         getCitations();
+        updatePaperDetails();
         searchResult = null;
     }
 
@@ -631,13 +722,64 @@ function searchTitle() {
     //console.log(maxPaperCitationOnSelected);
 }
 
+// click button "search"
+function searchAuthor() {
+    selectedPaper = null;
+    references = [];
+    citedBy = [];
+    searchResult = [];
+    maxPaperCitationOnSelected = 0;
+    var target = new RegExp(searchAuthorTarget, "i");
+    for (var year = 2002; year < 2016; year++) {
+        if (paperData.hasOwnProperty(year.toString())) {
+            (function () {
+                var i, j;
+                for (i = 0; i < paperData[year].length; i++) {
+                    var found = false;
+                    for (j = 0; j < paperData[year][i].authors.length; j++) {
+                        if (paperData[year][i].authors[j].match(target)) {
+                            found = true;
+                        }
+                    }
+
+                    if (found) {
+                        searchResult.push(paperData[year][i]);
+                        maxPaperCitationOnSelected = Math.max(getCitedCount(paperData[year][i]), maxPaperCitationOnSelected);
+                        paperData[year][i]['isTarget'] = true;
+                    } else {
+                        paperData[year][i]['isTarget'] = false;
+                    }
+                }
+            })();
+        }
+    }
+
+    // cannot find matching paper
+    if (searchResult.length == 0)
+        searchResult = null;
+
+    // only on matching paper, set it as selected paper
+    else if (searchResult.length == 1) {
+        selectedPaper = searchResult[0];
+        getCitations();
+        updatePaperDetails();
+        searchResult = null;
+    }
+
+    updateText();
+}
+
 function showCitation() {
     show_Citation = -show_Citation;
     updateText();
 }
 
-d3.select("#searchInput").on("input", function() {
-    searchTarget = this.value;
+d3.select("#searchTitle").on("input", function() {
+    searchTitleTarget = this.value;
+});
+
+d3.select("#searchAuthor").on("input", function() {
+    searchAuthorTarget = this.value;
 });
 
 function clearSelectedPaper() {
@@ -652,7 +794,7 @@ function updatePaperDetails() {
 
     d3.select("#pDetails").selectAll("div").remove();
 
-    var sampleAbstract = "Despite the visual importance of hair and the attention paid to hair modeling in the graphics research, modeling realistic hair still remains a very challenging task that can be performed by very few artists. In this paper we present hair meshes, a new method for modeling hair that aims to bring hair modeling as close as possible to modeling polygonal surfaces. This new approach provides artists with direct control of the overall shape of the hair, giving them the ability to model the exact hair shape they desire. We use the hair mesh structure for modeling the hair volume with topological constraints that allow us to automatically and uniquely trace the path of individual hair strands through this volume. We also define a set of topological operations for creating hair meshes that maintain these constraints. Furthermore, we provide a method for hiding the volumetric structure of the hair mesh from the end user, thus allowing artists to concentrate on manipulating the outer surface of the hair as a polygonal surface. We explain and show examples of how hair meshes can be used to generate individual hair strands for a wide variety of realistic hair styles."
+    var sampleAbstract = "Despite the visual importance of hair and the attention paid to hair modeling in the graphics research, modeling realistic hair still remains a very challenging task that can be performed by very few artists. In this paper we present hair meshes, a new method for modeling hair that aims to bring hair modeling as close as possible to modeling polygonal surfaces. This new approach provides artists with direct control of the overall shape of the hair, giving them the ability to model the exact hair shape they desire. We use the hair mesh structure for modeling the hair volume with topological constraints that allow us to automatically and uniquely trace the path of individual hair strands through this volume. We also define a set of topological operations for creating hair meshes that maintain these constraints. Furthermore, we provide a method for hiding the volumetric structure of the hair mesh from the end user, thus allowing artists to concentrate on manipulating the outer surface of the hair as a polygonal surface. We explain and show examples of how hair meshes can be used to generate individual hair strands for a wide variety of realistic hair styles.";
 
     var div =  d3.select("#pDetails").append("div");
     var span20 = "<span style=\"padding-left:20px\"></span>";

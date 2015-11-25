@@ -914,10 +914,8 @@
             ], 
             "references": [], 
             "authors": [
-                "Yanyun Chen", 
-                "Ying-Qing Xu", 
-                "Baining Guo", 
-                "Heung-Yeung Shum"
+                "Tae-Yong Kim",
+                "Ulrich Neumann"
             ], 
             "link": "http://doi.acm.org/10.1145/566654.566627", 
             "cited_count": 0, 
@@ -2803,7 +2801,7 @@
             "id": 148
         }, 
         {
-            "title": "Rhythmic-motion synthesis based on motion-beat analysis", 
+            "title": "Interactive multiresolution hair modeling and editing",
             "year": "2003", 
             "cited_by": [
                 267, 
@@ -2816,8 +2814,8 @@
             ], 
             "authors": [
                 "Tae-Hoon Kim", 
-                "Sang Il Park", 
-                "Sung Yong Shin"
+                "Sang Il Park",
+                "Ulrich Neumann"
             ], 
             "link": "http://doi.acm.org/10.1145/882262.882283", 
             "cited_count": 197, 
@@ -22979,10 +22977,10 @@
                 942
             ], 
             "authors": [
-                "Jiaping Wang", 
-                "Yue Dong", 
-                "Xin Tong", 
-                "Zhouchen Lin", 
+                "Jiaping Wang",
+                "Yue Dong",
+                "Xin Tong",
+                "Zhouchen Lin",
                 "Baining Guo"
             ], 
             "link": "http://doi.acm.org/10.1145/1531326.1531335", 
@@ -27419,11 +27417,11 @@
                 826
             ], 
             "authors": [
-                "Zhong Ren", 
-                "Kun Zhou", 
-                "Tengfei Li", 
-                "Wei Hua", 
-                "Baining Guo"
+                "Kun Xu",
+                "Li-Qian Ma",
+                "Bo Ren",
+                "Rui Wang",
+                "Shi-Min Hu"
             ], 
             "link": "http://doi.acm.org/10.1145/1833351.1778792", 
             "cited_count": 16, 
