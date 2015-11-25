@@ -1,7 +1,8 @@
 /*globals d3, topojson, document*/
 // These are helpers for those using JSHint
 
-var paperData,
+var abstractData,
+    paperData,
     selectedPaper,
     references,
     citedBy,
@@ -39,6 +40,10 @@ function getReferences(data) {return data.references;}
  * @param {{authors:[]}} data
  */
 function getAuthors(data) {return data.authors;}
+/**
+ * @param {{abstract:[]}} data
+ */
+function getAbstract(data) {return data.abstract;}
 
 function getMaxCitations() {
     maxPaperCitations = [];
@@ -494,6 +499,11 @@ d3.json("Data/all_papers_cited_count.json", function (error, loadedData) {
     d3.select("#citationCheckbox").on("change", showCitation);
 });
 
+d3.json("Data/all_papers_abs.json", function (error, loadedData) {
+    if (error) throw error;
+    abstractData = loadedData;
+});
+
 function updateText() {
     referencePaperPos = [];
     citedPaperPos = [];
@@ -794,11 +804,13 @@ function updatePaperDetails() {
 
     d3.select("#pDetails").selectAll("div").remove();
 
-    var sampleAbstract = "Despite the visual importance of hair and the attention paid to hair modeling in the graphics research, modeling realistic hair still remains a very challenging task that can be performed by very few artists. In this paper we present hair meshes, a new method for modeling hair that aims to bring hair modeling as close as possible to modeling polygonal surfaces. This new approach provides artists with direct control of the overall shape of the hair, giving them the ability to model the exact hair shape they desire. We use the hair mesh structure for modeling the hair volume with topological constraints that allow us to automatically and uniquely trace the path of individual hair strands through this volume. We also define a set of topological operations for creating hair meshes that maintain these constraints. Furthermore, we provide a method for hiding the volumetric structure of the hair mesh from the end user, thus allowing artists to concentrate on manipulating the outer surface of the hair as a polygonal surface. We explain and show examples of how hair meshes can be used to generate individual hair strands for a wide variety of realistic hair styles.";
+    //var sampleAbstract = "Despite the visual importance of hair and the attention paid to hair modeling in the graphics research, modeling realistic hair still remains a very challenging task that can be performed by very few artists. In this paper we present hair meshes, a new method for modeling hair that aims to bring hair modeling as close as possible to modeling polygonal surfaces. This new approach provides artists with direct control of the overall shape of the hair, giving them the ability to model the exact hair shape they desire. We use the hair mesh structure for modeling the hair volume with topological constraints that allow us to automatically and uniquely trace the path of individual hair strands through this volume. We also define a set of topological operations for creating hair meshes that maintain these constraints. Furthermore, we provide a method for hiding the volumetric structure of the hair mesh from the end user, thus allowing artists to concentrate on manipulating the outer surface of the hair as a polygonal surface. We explain and show examples of how hair meshes can be used to generate individual hair strands for a wide variety of realistic hair styles.";
 
     var div =  d3.select("#pDetails").append("div");
     var span20 = "<span style=\"padding-left:20px\"></span>";
     if (selectedPaper) {
+        var abstract = getAbstract(abstractData[selectedPaper.id]);
+
         var authorsList = selectedPaper.authors[0];
         for (var i = 1; i < getAuthors(selectedPaper).length; i++)
             authorsList += ( span20 + selectedPaper.authors[i]);
@@ -807,7 +819,7 @@ function updatePaperDetails() {
             "<h1>" + (selectedPaper.title) + "</h1>" +
             "<p>" + (authorsList) + "</p>" +
             "<h3> Abstract </h3>" +
-            "<p  align=\"left\">" + (sampleAbstract) + "</p>" +
+            "<p  align=\"left\">" + (abstract) + "</p>" +
             "<p  align=\"left\">" + "Keywords:" + "</p>" +
             "<p  align=\"left\">" + "Year: "+ selectedPaper.year + span20 + "Cited by " + selectedPaper.cited_count + "</p>" +
             "<p  align=\"left\">" + "External Link: " +
@@ -829,22 +841,20 @@ function updateSubPaperView() {
     d3.select("#pSubView")
         .on("mousemove", function() {
             fisheye.focus(d3.mouse(this));
-            var titles = d3.selectAll(".subTitle")
+            d3.selectAll(".subTitle")
                     .each(function(d) {})
-                    .attr("transform", function (d) {
+                    .attr("transform", function () {
                         var pos = {
                             x:d3.transform(this.getAttribute("transform")).translate[0]+22.5,
                             y:d3.transform(this.getAttribute("transform")).translate[1]
                         };
-                        var feye = fisheye(pos);
+                        var fEye = fisheye(pos);
                         return "translate("+ (pos.x-22.5) +","+ pos.y
-                            +")"+"scale(" + feye.z+","+ feye.z+")"
+                            +")"+"scale(" + fEye.z+","+ fEye.z+")"
                             ;
                     })
                 ;
         });
-
-
 
     // Draw axis
     var xAxisWidth = 1240;
@@ -891,6 +901,8 @@ function updateSubPaperView() {
         .attr("transform", function () {
             return "translate(-45," + subTitleBegin + ")"
         });
+
+    //console.log(abstractData);
 
     //var barId, rectId;
     var selection;
