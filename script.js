@@ -21,7 +21,8 @@ var abstractData,
     show_Citation = -1,
     referencePaperPos = [],
     selectedPaperPos,
-    citedPaperPos
+    citedPaperPos,
+    keywordGraph
 ;
 
 /**
@@ -503,6 +504,15 @@ d3.json("Data/all_papers_abs.json", function (error, loadedData) {
     if (error) throw error;
     abstractData = loadedData;
 });
+
+// Load the keywords
+(function loadKeywords() {
+    queue().defer(d3.json, 'Data/keyword_graph.json').await(keywordsLoaded);
+})();
+function keywordsLoaded(error, data) {
+    if (error) throw error;
+    keywordGraph = data;
+}
 
 function updateText() {
     referencePaperPos = [];
