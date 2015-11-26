@@ -190,7 +190,7 @@ import operator
 sorted_keywords = sorted(keyword_occurences.items(), key=operator.itemgetter(1))
 with codecs.open(work_dir + '/keywords.txt', 'w', 'utf-8-sig') as f:
     for t in sorted_keywords:
-        if t[0] not in banned_keywords and t[1] > 1:
+        if t[0] not in banned_keywords and t[1] > 4:
                 f.write('' + t[0] + ' ' + str(t[1]) + '\n')
 
 keyword_pair_set = set() # set of all keyword-keyword pairs
@@ -207,7 +207,7 @@ for k, p in all_papers.iteritems():
             p.title = p.title[:-1]
         all_papers_in_siggraph.setdefault(p.year, []).append(p)
         # filter all keywords that does not appear at least twice
-        p.keywords = filter(lambda x: keyword_occurences[x] > 1 and x not in banned_keywords, p.keywords)
+        p.keywords = filter(lambda x: keyword_occurences[x] > 4 and x not in banned_keywords, p.keywords)
         # populate keyword-keyword map and keyword-paper map
         for k1 in p.keywords:
             for k2 in p.keywords:
@@ -219,7 +219,7 @@ for k, p in all_papers.iteritems():
     all_papers_in_siggraph_abstract.append(paper_abs)
 all_papers_in_siggraph_abstract.sort(key=lambda x: x.id)
 
-keyword_occurences = filter(lambda x: keyword_occurences[x] > 1 and x not in banned_keywords, keyword_occurences)
+keyword_occurences = filter(lambda x: keyword_occurences[x] > 4 and x not in banned_keywords, keyword_occurences)
 keyword_id = {} # map a keyword to its id
 kid = 0
 for k in keyword_occurences:
@@ -268,9 +268,6 @@ with open(work_dir + '/' + 'all_papers.json', 'w') as f:
 
 with codecs.open(work_dir + '/' + 'all_papers_abs.json', 'w', 'utf-8-sig') as f:
     json.dump(all_papers_in_siggraph_abstract, f, default=lambda o: o.__dict__, indent=4)
-#for year, paper_list in all_papers_in_siggraph_abstract.iteritems():
-#    for paper in paper_list:
-#        print(paper.abstract.encode('utf8').decode('ascii'))
 
 # write a text file containing all the papers' titles
 with codecs.open(work_dir + '/' + 'paper_titles.txt', 'w', 'utf-8-sig') as f:
