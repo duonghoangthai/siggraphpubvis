@@ -37,6 +37,20 @@ KeywordVis.prototype.init = function() {
         //.style("fill", "rgb(119, 119, 119)");
         .attr("fill", "rgb(248, 248, 248)");
 
+    var self = this;
+    cells.append("text")
+        .attr("class", "leadChar")
+        .attr("x", 5)
+        .attr("y", function(d) { return 17; })
+        .attr("fill", "rgb(20, 150, 250)")
+        .attr("fill-opacity","0.6")
+        .attr("font-size", "40px")
+        .text(function(d, i) {
+            if (i > 0 && d.text.slice(0, 1) != self.keywordGraph.vertices[i-1].text.slice(0, 1))
+                return d.text.slice(0, 1).toUpperCase();
+            return "";
+        });
+
     cells.append("text")
         .attr("class", "keyword")
         .attr("x", 5)
@@ -44,6 +58,8 @@ KeywordVis.prototype.init = function() {
         .attr("fill", "rgb(20, 20, 20)")
         .attr("font-size", function(d, i) { if (i === mouseover_item) return "10px"; else return "19px"; })
         .text(function(d) { return d.text; });
+
+
 }
 
 KeywordVis.prototype.update = function() {
@@ -64,7 +80,7 @@ KeywordVis.prototype.update = function() {
         .attr("fill-opacity", func)
         .attr("stroke-opacity", func);
 
-    text = this.svg.selectAll("text").data(this.keywordGraph.vertices);
+    text = this.svg.selectAll(".keyword").data(this.keywordGraph.vertices);
     text.transition()
         .duration(100)
         .ease("linear")
