@@ -11,12 +11,19 @@ function KeywordVis(keywordGraph) {
 }
 
 KeywordVis.prototype.update = function() {
-    var squares = this.svg.append("g").selectAll("rect").data(this.keywordGraph.vertices);
+    var border_x = 15;
+    var border_y = 15;
+    var squares = this.svg.append("g")
+        .attr("transform", "translate(" + border_x + "," + border_y + ")")
+        .selectAll("rect").data(this.keywordGraph.vertices);
+
+    var text_width = 50;
+    var text_height = 30;
     squares.enter().append("rect")
-        .attr("x", function(d, i) { return i * 50; })
-        .attr("y", 0)
-        .attr("width", 50)
-        .attr("height", 30)
-        .style("stroke", "black")
-        .style("fill", "red");
+        .attr("x", function(d, i) { return (i % 21) * text_width; })
+        .attr("y", function(d, i) { return Math.floor(i / 21) * text_height; })
+        .attr("width", text_width)
+        .attr("height", text_height)
+        .style("stroke", "white")
+        .style("fill", "rgb(119, 119, 119)");
 }
