@@ -26,34 +26,45 @@ KeywordVis.prototype.init = function() {
         .data(this.keywordGraph.vertices)
         .enter().append("g")
         .attr("transform", function(d, i) {
-            return "translate(" + (i % 23) * text_width + ","
-                + Math.floor(i / 23) * text_height + ")"});
+            return "translate(" + Math.floor(i / 32) * text_width + ","
+                + (i % 32) * text_height + ")"});
 
     cells.append("rect")
         .attr("width", text_width)
         .attr("height", text_height)
         .style("stroke", "rgb(248, 248, 248)")
-        .style("stroke-width", "10")
+        .style("stroke-width", "8")
         //.style("fill", "rgb(119, 119, 119)");
-        .style("fill", "rgb(248, 248, 248)")
+        .style("fill", "rgb(248, 248, 248)");
 
     cells.append("text")
         .attr("x", 5)
-        .attr("y", function(d) { return text_height / 3 * 2; })
+        .attr("y", function(d) { return 17; })
         .attr("fill", "rgb(20, 20, 20)")
-        .attr("font-size", function(d, i) { if (i === mouseover_item) return "10px"; else return "20px"; })
+        .attr("font-size", function(d, i) { if (i === mouseover_item) return "10px"; else return "19px"; })
         .text(function(d) { return d.text; });
 }
 
 KeywordVis.prototype.update = function() {
+    var mouse_x = Math.floor(mouseover_item / 32);
+    var mouse_y = mouseover_item % 32;
+    var func = function(d, i) {
+        var x = Math.floor(i / 32);
+        var y = i % 32;
+        if (mouse_y == y && x != mouse_x && Math.abs(x - mouse_x) <= 3)
+            return "0.1";
+        return "1";
+    }
     var rect = this.svg.selectAll("rect").data(this.keywordGraph.vertices)
-        .attr("fill-opacity", function(d, i) { if (i === mouseover_item + 1 || i === mouseover_item + 2) return "0"; else return "1"; })
-        .attr("stroke-opacity", function(d, i) { if (i === mouseover_item + 1 || i === mouseover_item + 2) return "0"; else return "1"; });
+        .attr("fill-opacity", func)
+        .attr("stroke-opacity", func);
 
-    var text = this.svg.selectAll("text").data(this.keywordGraph.vertices)
-        .attr("fill-opacity", function(d, i) { if (i === mouseover_item + 1 || i === mouseover_item + 2) return "0"; else return "1"; })
-        .attr("stroke-opacity", function(d, i) { if (i === mouseover_item + 1 || i === mouseover_item + 2) return "0"; else return "1"; })
-        .attr("font-size", function(d, i) { if (i === mouseover_item) return "21px"; else return "20px"; });
+    text = this.svg.selectAll("text").data(this.keywordGraph.vertices)
+        .attr("fill-opacity", func)
+        .attr("stroke-opacity", func)
+        .attr("fill", function(d, i) { if (i == mouseover_item) return "rgb(150, 90, 78)"; else return "rgb(20, 20, 20)"; });
+
     var self = this;
     text.on("mouseover", function(d, i) { mouseover_item = i; self.update(); });
+    this.svg.on("mouseleave", function(d) { mouseover_item = -1; self.update(); });
 }
