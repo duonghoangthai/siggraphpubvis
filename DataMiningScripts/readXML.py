@@ -260,6 +260,8 @@ for (k1, k2) in keyword_pair_set:
     e.second = keyword_id[k2]
     keyword_graph.edges.append(e)
 
+keyword_graph.vertices.sort(key=lambda x: x.text)
+
 with open(work_dir + '/' + 'keyword_graph.json', 'w') as f:
     json.dump(keyword_graph, f, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
