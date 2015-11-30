@@ -193,7 +193,7 @@ with codecs.open(work_dir + '/keywords.txt', 'w', 'utf-8-sig') as f:
         if t[0] not in banned_keywords and t[1] > 4:
                 f.write('' + t[0] + ' ' + str(t[1]) + '\n')
 
-keyword_pair_set = set() # set of all keyword-keyword pairs
+keyword_map = collections.defaultdict(list) # map from a keyword to a list of related-keywords
 keyword_paper_map = collections.defaultdict(list)
 
 # remove all papers that are not in siggraph
@@ -211,8 +211,8 @@ for k, p in all_papers.iteritems():
         # populate keyword-keyword map and keyword-paper map
         for k1 in p.keywords:
             for k2 in p.keywords:
-                if k2 > k1:
-                    keyword_pair_set.add((k1, k2))
+                if k2 != k1:
+                    keyword_map[k1].append(k2)
             keyword_paper_map[k1].append(p.id)
     else:
         paper_abs.abstract=""
@@ -234,10 +234,9 @@ class Vertex:
         self.papers = []
 
 # an Edge connects two keywords
-class Edge:
+class Neighbors:
     def __init__(self):
-        self.first = 0
-        self.second = 0
+        self.neighbors = [] # each keyword stores a list of neighbors
 
 # keyword graph
 class Graph(JSONEncoder):
@@ -254,10 +253,9 @@ for k, i in keyword_id.iteritems():
     v.papers = keyword_paper_map[k]
     keyword_graph.vertices.append(v)
 
-for (k1, k2) in keyword_pair_set:
-    e = Edge()
-    e.first = keyword_id[k1]
-    e.second = keyword_id[k2]
+for (k, l) in keyword_map.iteritems():
+    e = Neighbors()
+    e.neighbors = list(keyword_id[x] for x in set(l))
     keyword_graph.edges.append(e)
 
 keyword_graph.vertices.sort(key=lambda x: x.text)
