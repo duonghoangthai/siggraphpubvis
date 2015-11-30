@@ -6,6 +6,7 @@ from json import JSONEncoder
 import codecs
 import collections
 import unicodedata
+from collections import Counter
 
 class Paper(JSONEncoder):
     def __init__(self):
@@ -255,7 +256,10 @@ for k, i in keyword_id.iteritems():
 
 for (k, l) in keyword_map.iteritems():
     e = Neighbors()
-    e.neighbors = list(keyword_id[x] for x in set(l))
+    c = Counter(l)
+    for (x, n) in c.iteritems():
+        if n > 1:
+            e.neighbors.append(keyword_id[x])
     keyword_graph.edges.append(e)
 
 keyword_graph.vertices.sort(key=lambda x: x.text)
