@@ -21,7 +21,9 @@ var abstractData,
     show_Citation = -1,
     referencePaperPos = [],
     selectedPaperPos,
-    citedPaperPos
+    citedPaperPos,
+    forceGraphMapping,
+    connected
 ;
 
 /**
@@ -293,6 +295,7 @@ function updateYearBar() {
                         updateText();
                         updatePaperDetails();
                         updateSubPaperView();
+                        updateAuthorsView();
                         d3.event.stopPropagation();
                     })
                     .on("mouseover", function(d) {
@@ -495,6 +498,7 @@ d3.json("Data/all_papers_cited_count.json", function (error, loadedData) {
 
     updateYearBar();
     updatePaperDetails();
+    updateAuthorsView();
 
     d3.select("#citationCheckbox").on("change", showCitation);
 });
@@ -724,6 +728,7 @@ function searchTitle() {
         selectedPaper = searchResult[0];
         getCitations();
         updatePaperDetails();
+        updateAuthorsView();
         searchResult = null;
     }
 
@@ -773,6 +778,7 @@ function searchAuthor() {
         selectedPaper = searchResult[0];
         getCitations();
         updatePaperDetails();
+        updateAuthorsView();
         searchResult = null;
     }
 
@@ -803,8 +809,6 @@ function clearSelectedPaper() {
 function updatePaperDetails() {
 
     d3.select("#pDetails").selectAll("div").remove();
-
-    //var sampleAbstract = "Despite the visual importance of hair and the attention paid to hair modeling in the graphics research, modeling realistic hair still remains a very challenging task that can be performed by very few artists. In this paper we present hair meshes, a new method for modeling hair that aims to bring hair modeling as close as possible to modeling polygonal surfaces. This new approach provides artists with direct control of the overall shape of the hair, giving them the ability to model the exact hair shape they desire. We use the hair mesh structure for modeling the hair volume with topological constraints that allow us to automatically and uniquely trace the path of individual hair strands through this volume. We also define a set of topological operations for creating hair meshes that maintain these constraints. Furthermore, we provide a method for hiding the volumetric structure of the hair mesh from the end user, thus allowing artists to concentrate on manipulating the outer surface of the hair as a polygonal surface. We explain and show examples of how hair meshes can be used to generate individual hair strands for a wide variety of realistic hair styles.";
 
     var div =  d3.select("#pDetails").append("div");
     var span20 = "<span style=\"padding-left:20px\"></span>";
@@ -952,4 +956,257 @@ function updateSubPaperView() {
             })();
         }
     }
+}
+
+function getMappingId(n) {
+    for (var i = 0; i < forceGraphMapping.length; i++) {
+        if (forceGraphMapping[i] == n)
+            return i;
+    }
+
+    return -1;
+}
+
+function updateAuthorsView () {
+
+    if (selectedPaper) {
+        forceGraphMapping = [];
+        var vertices = [];
+        var edges = [];
+        var mappingId = 0;
+        var year;
+
+        for (year = 2015; year > 2001; year--) {
+            if (paperData.hasOwnProperty(year.toString())) {
+                (function () {
+                    for (var i = 0; i < paperData[year].length; i++) {
+                        var matching = false;
+                        for (var j = 0; j < getAuthors(paperData[year][i]).length; j++) {
+                            if (matching == false) {
+                                for (var t = 0; t < getAuthors(selectedPaper).length; t++) {
+                                    if (getAuthors(selectedPaper)[t] == getAuthors(paperData[year][i])[j]) {
+                                        matching = true;
+                                        var tmp = {
+                                            "_id": mappingId,
+                                            "_type": "vertex",
+                                            "data_type": "paper",
+                                            "title": paperData[year][i].title
+                                        };
+                                        vertices.push(tmp);
+                                        forceGraphMapping.push(paperData[year][i].title);
+                                        mappingId++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })();
+            }
+        }
+
+        for (var i = 0; i < getAuthors(selectedPaper).length; i++) {
+            var tmp = {
+                "_id": mappingId,
+                "_type": "vertex",
+                "data_type": "author",
+                "author": getAuthors(selectedPaper)[i]
+            };
+            vertices.push(tmp);
+            forceGraphMapping.push(getAuthors(selectedPaper)[i]);
+            mappingId++;
+        }
+
+        for (year = 2015; year > 2001; year--) {
+            if (paperData.hasOwnProperty(year.toString())) {
+                (function () {
+                    for (var i = 0; i < paperData[year].length; i++) {
+                        for (var j = 0; j < getAuthors(paperData[year][i]).length; j++) {
+                            for (var t = 0; t < getAuthors(selectedPaper).length; t++) {
+                                if (getAuthors(selectedPaper)[t] == getAuthors(paperData[year][i])[j]) {
+                                    var tmp = {
+                                        "source": getMappingId(getAuthors(paperData[year][i])[j]),
+                                        "target": getMappingId(paperData[year][i].title),
+                                        "_type": "edge"
+                                    };
+                                    edges.push(tmp);
+                                }
+                            }
+                        }
+                    }
+                })();
+            }
+        }
+
+        d3.select("#aView").selectAll("svg").remove();
+        var baseSvg = d3.select("#aView").append("svg")
+                .attr("width", 1000)
+                .attr("height", 530)
+            ;
+
+        var force = d3.layout.force()
+            .charge(-200)
+            .linkDistance(80)
+            .friction(0.9)
+            .gravity(0.0)
+            .size([1000, 530]);
+
+        force.nodes(vertices)
+            .links(edges)
+            .start();
+
+        var link =  baseSvg.append('g').selectAll(".link")
+                .data(edges)
+                .enter().append("line")
+                .attr("class", "link")
+                .attr("stroke", "rgb(216, 216, 216)")
+            ;
+
+        var node = baseSvg.append('g').selectAll(".node")
+            .data(vertices)
+            .enter().append("g")
+            .attr("class", "node")
+            .on("mouseover", function(d) {
+                connected = [d];
+                link.style('stroke-width', function(l) {
+                        if (d === l.source) {connected.push(l.target); return 1;}
+                        else if (d === l.target) {connected.push(l.source); return 1;}
+                        else return 1;})
+                    .style('stroke', function(l) {
+                        if (d === l.source || d === l.target) return "rgb(116, 116, 116)";
+                        else return "rgb(216, 216, 216)";
+                    })
+                    .style('stroke-opacity', function(l) {
+                        if (d === l.source || d === l.target) return 1.0;
+                        else return 0.5;
+                    })
+                ;
+                node.style('opacity', function(l) {
+                        if (isConnected(l)) return 1.0;
+                        else return 0.2;
+                    })
+                ;
+            })
+            .on("mouseout", function() {
+                link.style('stroke-width', 1)
+                    .style('stroke', "rgb(216, 216, 216)")
+                    .style('stroke-opacity', 1.0)
+                ;
+                node.style('opacity', 1.0);
+            })
+            .call(force.drag);
+
+        node.append("text")
+            .attr("dx", 12)
+            .attr("dy", ".35em")
+            .text(function(d) {
+                if (d.data_type === "author" ) return d['author'];
+                else return "";
+            });
+
+        var authorCount = 0;
+        node.each(function (d) {
+            if (d.data_type === "author" ) {
+                d3.select(this).append("image")
+                    .attr("xlink:href", function(d) {
+                        if (d.data_type === "author" ) return "user.svg";
+                        else if (d.data_type === "paper") return "paper.svg";
+                        //else if (d.data_type === "paper") return "null";
+                    })
+                    .attr("x", -15)
+                    .attr("y", -15)
+                    .attr("width", 30)
+                    .attr("height", 30)
+                    //.attr("opacity", 0.5)
+                ;
+            } else {
+                d3.select(this).append("path")
+                    .attr("d", d3.svg.symbol()
+                        .type(function(d) {
+                            if (d.data_type === "author" ) {return "triangle-up";}
+                            else if (d.data_type === "paper") {return "circle";}
+                        })
+                        .size(function(d) {
+                            if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title) {
+                                return 200;
+                            } else
+                                return 100;
+                        }))
+                    .style("fill", function(d) {
+                        if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title)
+                            return "red";
+                        else if (d.data_type === "author" ) {return "Orange";}
+                        else return "ForestGreen";
+                    })
+                    .style("stroke", "grey")
+                    .style("stroke-width", "1")
+                ;
+            }
+
+            //console.log(d);
+            if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title ) {
+                d3.select(this).classed("fixed", d.fixed = true);
+                d['px'] = 500;
+                d['py'] = 265;
+            } else if (d.data_type === "author") {
+                d3.select(this).classed("fixed", d.fixed = true);
+                d['px'] = 500 + (250 + 100)*Math.cos(authorCount/getAuthors(selectedPaper).length*6.28+0.11);
+                d['py'] = 265 + (5*authorCount + 100)*Math.sin(authorCount/getAuthors(selectedPaper).length*6.28+0.11);
+                authorCount++;
+            }
+        });
+
+
+        //node.append("image")
+        //    .attr("xlink:href", function(d) {
+        //        if (d.data_type === "author" ) return "user.svg";
+        //        else if (d.data_type === "paper") return "paper.svg";
+        //        //else if (d.data_type === "paper") return "null";
+        //    })
+        //    .attr("x", -15)
+        //    .attr("y", -15)
+        //    .attr("width", 30)
+        //    .attr("height", 30)
+        //    .attr("opacity", 0.5)
+        //;
+
+        //node.append("path")
+        //    .attr("d", d3.svg.symbol()
+        //        .type(function(d) {
+        //            if (d.data_type === "author" ) {return "triangle-up";}
+        //            else if (d.data_type === "paper") {return "circle";}
+        //        })
+        //        .size(function(d) {
+        //            if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title) {
+        //                return 300;
+        //            } else
+        //                return 100;
+        //        }))
+        //    .style("fill", function(d) {
+        //        if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title)
+        //            return "red";
+        //        else if (d.data_type === "author" ) {return "Orange";}
+        //        else return "ForestGreen";
+        //    })
+        //    .style("stroke", "grey")
+        //    .style("stroke-width", "1")
+        //;
+
+        force.on("tick", function () {
+            link.attr("x1", function (d) {return d.source.x;})
+                .attr("y1", function (d) {return d.source.y;})
+                .attr("x2", function (d) {return d.target.x;})
+                .attr("y2", function (d) {return d.target.y;});
+
+            node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+        });
+
+    }
+}
+
+function isConnected(d) {
+    for (var i = 0; i < connected.length; i++) {
+        if (d === connected[i])
+            return true;
+    }
+    return false;
 }

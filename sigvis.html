@@ -80,7 +80,14 @@
             background-color:#e9e9e9;
         }
 
+        /*svg {*/
+            /*border:1px solid black;*/
+        /*}*/
 
+        .node text {
+            pointer-events: none;
+            font: 10px sans-serif;
+        }
     </style>
 
     <!-- d3 and my scripts -->
@@ -220,21 +227,21 @@
 <a  name="paperDetails"></a>
 <div class="content-section">
     <div class="container">
-        <div class="row" style="height:400px;">
+        <div class="row" style="height:450px;">
             <div id="pDetails" style="text-align: center;"></div>
         </div>
     </div>
     <div id="pSubView" style="text-align: center;"></div>
+    <div class="row" style="height:50px;"></div>
 </div>
 <!-- paperDetails -->
 
 <a  name="authorView"></a>
 <div class="content-section">
     <div class="container">
-        <div class="row" style="height:500px;">
-            <div id="aView" style="text-align: center;">
-                <h1> Here is author view </h1>
-            </div>
+        <div class="row" style="height:500px; text-align: center;">
+            <h1> Author View </h1>
+            <div id="aView" style="text-align: center;"></div>
         </div>
     </div>
 </div>
