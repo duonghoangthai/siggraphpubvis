@@ -6,6 +6,7 @@ from json import JSONEncoder
 import codecs
 import collections
 import unicodedata
+from collections import Counter
 
 class Paper(JSONEncoder):
     def __init__(self):
@@ -190,10 +191,10 @@ import operator
 sorted_keywords = sorted(keyword_occurences.items(), key=operator.itemgetter(1))
 with codecs.open(work_dir + '/keywords.txt', 'w', 'utf-8-sig') as f:
     for t in sorted_keywords:
-        if t[0] not in banned_keywords and t[1] > 1:
+        if t[0] not in banned_keywords and t[1] > 4:
                 f.write('' + t[0] + ' ' + str(t[1]) + '\n')
 
-keyword_pair_set = set() # set of all keyword-keyword pairs
+keyword_map = collections.defaultdict(list) # map from a keyword to a list of related-keywords
 keyword_paper_map = collections.defaultdict(list)
 
 # remove all papers that are not in siggraph
@@ -207,19 +208,19 @@ for k, p in all_papers.iteritems():
             p.title = p.title[:-1]
         all_papers_in_siggraph.setdefault(p.year, []).append(p)
         # filter all keywords that does not appear at least twice
-        p.keywords = filter(lambda x: keyword_occurences[x] > 1 and x not in banned_keywords, p.keywords)
+        p.keywords = filter(lambda x: keyword_occurences[x] > 4 and x not in banned_keywords, p.keywords)
         # populate keyword-keyword map and keyword-paper map
         for k1 in p.keywords:
             for k2 in p.keywords:
-                if k2 > k1:
-                    keyword_pair_set.add((k1, k2))
+                if k2 != k1:
+                    keyword_map[k1].append(k2)
             keyword_paper_map[k1].append(p.id)
     else:
         paper_abs.abstract=""
     all_papers_in_siggraph_abstract.append(paper_abs)
 all_papers_in_siggraph_abstract.sort(key=lambda x: x.id)
 
-keyword_occurences = filter(lambda x: keyword_occurences[x] > 1 and x not in banned_keywords, keyword_occurences)
+keyword_occurences = filter(lambda x: keyword_occurences[x] > 4 and x not in banned_keywords, keyword_occurences)
 keyword_id = {} # map a keyword to its id
 kid = 0
 for k in keyword_occurences:
@@ -234,10 +235,9 @@ class Vertex:
         self.papers = []
 
 # an Edge connects two keywords
-class Edge:
+class Neighbors:
     def __init__(self):
-        self.first = 0
-        self.second = 0
+        self.neighbors = [] # each keyword stores a list of neighbors
 
 # keyword graph
 class Graph(JSONEncoder):
@@ -254,11 +254,15 @@ for k, i in keyword_id.iteritems():
     v.papers = keyword_paper_map[k]
     keyword_graph.vertices.append(v)
 
-for (k1, k2) in keyword_pair_set:
-    e = Edge()
-    e.first = keyword_id[k1]
-    e.second = keyword_id[k2]
+for (k, l) in keyword_map.iteritems():
+    e = Neighbors()
+    c = Counter(l)
+    for (x, n) in c.iteritems():
+        if n > 1:
+            e.neighbors.append(keyword_id[x])
     keyword_graph.edges.append(e)
+
+keyword_graph.vertices.sort(key=lambda x: x.text)
 
 with open(work_dir + '/' + 'keyword_graph.json', 'w') as f:
     json.dump(keyword_graph, f, default=lambda o: o.__dict__, sort_keys=True, indent=4)
@@ -268,9 +272,6 @@ with open(work_dir + '/' + 'all_papers.json', 'w') as f:
 
 with codecs.open(work_dir + '/' + 'all_papers_abs.json', 'w', 'utf-8-sig') as f:
     json.dump(all_papers_in_siggraph_abstract, f, default=lambda o: o.__dict__, indent=4)
-#for year, paper_list in all_papers_in_siggraph_abstract.iteritems():
-#    for paper in paper_list:
-#        print(paper.abstract.encode('utf8').decode('ascii'))
 
 # write a text file containing all the papers' titles
 with codecs.open(work_dir + '/' + 'paper_titles.txt', 'w', 'utf-8-sig') as f:

@@ -508,6 +508,15 @@ d3.json("Data/all_papers_abs.json", function (error, loadedData) {
     abstractData = loadedData;
 });
 
+// Load the keywords
+(function loadKeywords() {
+    queue().defer(d3.json, 'Data/keyword_graph.json').await(keywordsLoaded);
+})();
+function keywordsLoaded(error, data) {
+    if (error) throw error;
+    var keywordVis = new KeywordVis(data);
+}
+
 function updateText() {
     referencePaperPos = [];
     citedPaperPos = [];
