@@ -1095,6 +1095,11 @@ function updateAuthorsView () {
                         else return 0.2;
                     })
                 ;
+
+                d3.select(this).selectAll("text")
+                    .text(function(d) {
+                        return d.title;
+                    });
             })
             .on("mouseout", function() {
                 link.style('stroke-width', 1)
@@ -1102,6 +1107,16 @@ function updateAuthorsView () {
                     .style('stroke-opacity', 1.0)
                 ;
                 node.style('opacity', 1.0);
+                node.selectAll("text").remove();
+                node.append("text")
+                    .attr("dx", 12)
+                    .attr("dy", ".35em")
+                    .text(function(d) {
+                        if (d.data_type === "author" ) return d['author'];
+                        else return "";
+                    });
+                ;
+
             })
             .call(force.drag);
 
