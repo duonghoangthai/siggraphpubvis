@@ -296,6 +296,7 @@ function updateYearBar() {
                         updatePaperDetails();
                         updateSubPaperView();
                         updateAuthorsView();
+                        updateAuthorTitle();
                         d3.event.stopPropagation();
                     })
                     .on("mouseover", function(d) {
@@ -499,6 +500,7 @@ d3.json("Data/all_papers_cited_count.json", function (error, loadedData) {
     updateYearBar();
     updatePaperDetails();
     updateAuthorsView();
+    updateAuthorTitle();
 
     d3.select("#citationCheckbox").on("change", showCitation);
 });
@@ -735,10 +737,13 @@ function searchTitle() {
     /// only on matching paper, set it as selected paper
     else if (searchResult.length == 1) {
         selectedPaper = searchResult[0];
+        searchResult = null;
+
         getCitations();
         updatePaperDetails();
+        updateSubPaperView();
         updateAuthorsView();
-        searchResult = null;
+        updateAuthorTitle();
     }
 
     updateText();
@@ -786,10 +791,13 @@ function searchAuthor() {
     // only on matching paper, set it as selected paper
     else if (searchResult.length == 1) {
         selectedPaper = searchResult[0];
+        searchResult = null;
+
         getCitations();
         updatePaperDetails();
+        updateSubPaperView();
         updateAuthorsView();
-        searchResult = null;
+        updateAuthorTitle();
     }
 
     updateText();
@@ -838,6 +846,20 @@ function updatePaperDetails() {
             "<p  align=\"left\">" + "Year: "+ selectedPaper.year + span20 + "Cited by " + selectedPaper.cited_count + "</p>" +
             "<p  align=\"left\">" + "External Link: " +
             "<a href=\"" + selectedPaper.link + "\">" + selectedPaper.link + "</a></p>"
+        );
+    } else {
+        div.html("<h1>" + "No paper selected" + "</h1>");
+    }
+}
+
+function updateAuthorTitle() {
+
+    d3.select("#authorViewTitle").selectAll("div").remove();
+
+    var div =  d3.select("#authorViewTitle").append("div");
+    if (selectedPaper) {
+        div.html(
+            "<h1>" + (selectedPaper.title) + "</h1>"
         );
     } else {
         div.html("<h1>" + "No paper selected" + "</h1>");
@@ -1096,10 +1118,12 @@ function updateAuthorsView () {
                     })
                 ;
 
-                d3.select(this).selectAll("text")
-                    .text(function(d) {
-                        return d.title;
-                    });
+                if (d.data_type === "paper") {
+                    d3.select(this).selectAll("text")
+                        .text(function (d) {
+                            return d.title;
+                        });
+                }
             })
             .on("mouseout", function() {
                 link.style('stroke-width', 1)
@@ -1115,8 +1139,25 @@ function updateAuthorsView () {
                         if (d.data_type === "author" ) return d['author'];
                         else return "";
                     });
-                ;
+            })
+            .on("click", function(d) {
+                if (d.data_type === "paper")
+                {
+                    // clear searchResult
+                    searchResult = null;
 
+                    // put new selected paper
+                    selectedPaper = findSelectedTitle(d.title);
+
+                    getCitations();
+                    updateText();
+                    updatePaperDetails();
+                    updateSubPaperView();
+                    updateAuthorsView();
+                    updateAuthorTitle();
+
+                    d3.event.stopPropagation();
+                }
             })
             .call(force.drag);
 
@@ -1234,4 +1275,21 @@ function isConnected(d) {
             return true;
     }
     return false;
+}
+
+function findSelectedTitle(t) {
+    var result = null;
+    for (var year = 2002; year < 2016; year++) {
+        if (paperData.hasOwnProperty(year.toString())) {
+            (function () {
+                for (var i = 0; i < paperData[year].length; i++) {
+                    if (paperData[year][i].title === t) {
+                        result = paperData[year][i];
+                        return;
+                    }
+                }
+            })();
+        }
+    }
+    return result;
 }
