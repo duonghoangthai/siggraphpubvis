@@ -748,6 +748,7 @@ function searchTitle() {
 
 // click button "search"
 function searchAuthor() {
+    console.log("search "+searchAuthorTarget);
     selectedPaper = null;
     references = [];
     citedBy = [];

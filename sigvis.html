@@ -102,6 +102,7 @@
     <!-- d3 and my scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
 
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -236,21 +237,21 @@
 <a  name="paperDetails"></a>
 <div class="content-section">
     <div class="container">
-        <div class="row" style="height:400px;">
+        <div class="row" style="height:450px;">
             <div id="pDetails" style="text-align: center;"></div>
         </div>
     </div>
     <div id="pSubView" style="text-align: center;"></div>
+    <div class="row" style="height:50px;"></div>
 </div>
 <!-- paperDetails -->
 
 <a  name="authorView"></a>
 <div class="content-section">
     <div class="container">
-        <div class="row" style="height:500px;">
-            <div id="aView" style="text-align: center;">
-                <h1> Here is author view </h1>
-            </div>
+        <div class="row" style="height:500px; text-align: center;">
+            <h1> Author View </h1>
+            <div id="aView" style="text-align: center;"></div>
         </div>
     </div>
 </div>
@@ -259,9 +260,10 @@
 <a  name="keywordView"></a>
 <div class="content-section">
     <div class="container">
-        <div class="row" style="height:500px;">
+        <div class="row" style="height:900px;">
             <div id="kView" style="text-align: center;">
                 <h1> Here is keyword view </h1>
+                <svg width="1170" height="900"></svg>
             </div>
         </div>
     </div>
@@ -325,6 +327,7 @@
 
 <!-- Bootstrap Core JavaScript -->
 <script src="js/bootstrap.min.js"></script>
+<script type="application/javascript" src="KeywordVis.js"></script>
 <script type="application/javascript" src="script.js"></script>
 <script type="application/javascript" src="fisheye.js"></script>
 <script type="application/javascript" src="virtualscroller.js"></script>
