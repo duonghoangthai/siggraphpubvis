@@ -1002,6 +1002,7 @@ function getMappingId(n) {
 }
 
 function updateAuthorsView () {
+    var maxCitedCount = 0;
     if (selectedPaper) {
         forceGraphMapping = [];
         var vertices = [];
@@ -1023,8 +1024,10 @@ function updateAuthorsView () {
                                             "_id": mappingId,
                                             "_type": "vertex",
                                             "data_type": "paper",
-                                            "title": paperData[year][i].title
+                                            "title": paperData[year][i].title,
+                                            "citedCount": getCitedCount(paperData[year][i])
                                         };
+                                        maxCitedCount = Math.max(getCitedCount(paperData[year][i]), maxCitedCount);
                                         vertices.push(tmp);
                                         forceGraphMapping.push(paperData[year][i].title);
                                         mappingId++;
@@ -1036,6 +1039,10 @@ function updateAuthorsView () {
                 })();
             }
         }
+
+        var citationScale = d3.scale.linear()
+            .domain([0, maxCitedCount])
+            .range([50, 400]);
 
         for (var i = 0; i < getAuthors(selectedPaper).length; i++) {
             var tmp = {
@@ -1219,7 +1226,8 @@ function updateAuthorsView () {
                                 if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title) {
                                     return 200;
                                 } else
-                                    return 100;
+                                    return citationScale(d.citedCount);
+                                    //return 100;
                             }))
                         .style("fill", function (d) {
                             if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title)
