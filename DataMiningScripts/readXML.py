@@ -220,12 +220,33 @@ for k, p in all_papers.iteritems():
     all_papers_in_siggraph_abstract.append(paper_abs)
 all_papers_in_siggraph_abstract.sort(key=lambda x: x.id)
 
+# create a list of keywords per paper
+all_papers_sorted = []
+for (title, paper) in all_papers.iteritems():
+    all_papers_sorted.append(paper)
+all_papers_sorted.sort(key=lambda x : x.id)
+
+
 keyword_occurences = filter(lambda x: keyword_occurences[x] > 4 and x not in banned_keywords, keyword_occurences)
 keyword_id = {} # map a keyword to its id
 kid = 0
 for k in keyword_occurences:
     keyword_id[k] = kid
     kid += 1
+
+# create a list of keywords per paper
+class PaperKeyword(JSONEncoder):
+    def __init__(self):
+        self.keywords = []
+all_papers_keywords = []
+for paper in all_papers_sorted:
+    pk = PaperKeyword()
+    for k in p.keywords:
+        if k in keyword_id:
+            pk.keywords.append(keyword_id[k])
+    all_papers_keywords.append(pk)
+with open(work_dir + '/' + 'paper_keywords.json', 'w') as f:
+    json.dump(all_papers_keywords, f, default=lambda o: o.__dict__,indent=4)
 
 # a Vertex is a keyword
 class Vertex:
