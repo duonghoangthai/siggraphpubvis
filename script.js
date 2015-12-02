@@ -23,7 +23,9 @@ var abstractData,
     selectedPaperPos,
     citedPaperPos,
     forceGraphMapping,
-    connected
+    connected,
+    force,
+    aViewBaseSvg
 ;
 
 /**
@@ -499,7 +501,7 @@ d3.json("Data/all_papers_cited_count.json", function (error, loadedData) {
 
     updateYearBar();
     updatePaperDetails();
-    updateAuthorsView();
+    createAuthorsView();
     updateAuthorTitle();
 
     d3.select("#citationCheckbox").on("change", showCitation);
@@ -1000,7 +1002,7 @@ function getMappingId(n) {
 }
 
 function updateAuthorsView () {
-
+    var maxCitedCount = 0;
     if (selectedPaper) {
         forceGraphMapping = [];
         var vertices = [];
@@ -1022,8 +1024,10 @@ function updateAuthorsView () {
                                             "_id": mappingId,
                                             "_type": "vertex",
                                             "data_type": "paper",
-                                            "title": paperData[year][i].title
+                                            "title": paperData[year][i].title,
+                                            "citedCount": getCitedCount(paperData[year][i])
                                         };
+                                        maxCitedCount = Math.max(getCitedCount(paperData[year][i]), maxCitedCount);
                                         vertices.push(tmp);
                                         forceGraphMapping.push(paperData[year][i].title);
                                         mappingId++;
@@ -1035,6 +1039,10 @@ function updateAuthorsView () {
                 })();
             }
         }
+
+        var citationScale = d3.scale.linear()
+            .domain([0, maxCitedCount])
+            .range([50, 400]);
 
         for (var i = 0; i < getAuthors(selectedPaper).length; i++) {
             var tmp = {
@@ -1069,204 +1077,220 @@ function updateAuthorsView () {
             }
         }
 
-        d3.select("#aView").selectAll("svg").remove();
-        var baseSvg = d3.select("#aView").append("svg")
-                .attr("width", 1000)
-                .attr("height", 530)
-            ;
-
-        var force = d3.layout.force()
-            .charge(-200)
-            .linkDistance(80)
-            .friction(0.9)
-            .gravity(0.0)
-            .size([1000, 530]);
-
         force.nodes(vertices)
             .links(edges)
             .start();
 
-        var link =  baseSvg.append('g').selectAll(".link")
-                .data(edges)
-                .enter().append("line")
-                .attr("class", "link")
-                .attr("stroke", "rgb(216, 216, 216)")
-            ;
+        aViewBaseSvg.selectAll(".link").remove();
 
-        var node = baseSvg.append('g').selectAll(".node")
-            .data(vertices)
-            .enter().append("g")
-            .attr("class", "node")
-            .on("mouseover", function(d) {
-                connected = [d];
-                link.style('stroke-width', function(l) {
-                        if (d === l.source) {connected.push(l.target); return 1;}
-                        else if (d === l.target) {connected.push(l.source); return 1;}
-                        else return 1;})
-                    .style('stroke', function(l) {
-                        if (d === l.source || d === l.target) return "rgb(116, 116, 116)";
-                        else return "rgb(216, 216, 216)";
-                    })
-                    .style('stroke-opacity', function(l) {
-                        if (d === l.source || d === l.target) return 1.0;
-                        else return 0.5;
-                    })
+        setTimeout(dothis, 1000);
+
+        aViewBaseSvg.selectAll(".node").each(function (d) {
+            //console.log(d);
+            if (d.data_type === "paper" && d.title == selectedPaper.title) {
+                d3.select(this).
+                    transition().duration(1000).
+                    attr("transform", "translate(" + 500 + "," + 265 + ")");
+                d3.select(this).selectAll("path").
+                    transition().duration(1000)
+                    .attr("d", d3.svg.symbol().type("circle").size(200))
+                    .style("fill", "red")
+            } else {
+                d3.select(this).
+                    transition().duration(1000).
+                    style("opacity", 0);
+            }
+        });
+
+        function dothis() {
+
+            var link = aViewBaseSvg.selectAll(".link")
+                    .data(edges)
+                    .enter().append("line")
+                    .attr("class", "link")
+                    .attr("stroke", "rgb(216, 216, 216)")
                 ;
-                node.style('opacity', function(l) {
+
+            aViewBaseSvg.selectAll(".node").remove();
+
+            var node = aViewBaseSvg.selectAll(".node")
+                .data(vertices);
+
+            node.enter().append("g")
+                .attr("class", "node")
+                .on("mouseover", function (d) {
+                    connected = [d];
+                    link.style('stroke-width', function (l) {
+                        if (d === l.source) {
+                            connected.push(l.target);
+                            return 1;
+                        }
+                        else if (d === l.target) {
+                            connected.push(l.source);
+                            return 1;
+                        }
+                        else return 1;
+                    })
+                        .style('stroke', function (l) {
+                            if (d === l.source || d === l.target) return "rgb(116, 116, 116)";
+                            else return "rgb(216, 216, 216)";
+                        })
+                        .style('stroke-opacity', function (l) {
+                            if (d === l.source || d === l.target) return 1.0;
+                            else return 0.5;
+                        })
+                    ;
+                    node.style('opacity', function (l) {
                         if (isConnected(l)) return 1.0;
                         else return 0.2;
                     })
-                ;
+                    ;
 
-                if (d.data_type === "paper") {
-                    d3.select(this).selectAll("text")
+                    if (d.data_type === "paper") {
+                        d3.select(this).selectAll("text")
+                            .text(function (d) {
+                                return d.title;
+                            });
+                    }
+                })
+                .on("mouseout", function () {
+                    link.style('stroke-width', 1)
+                        .style('stroke', "rgb(216, 216, 216)")
+                        .style('stroke-opacity', 1.0)
+                    ;
+                    node.style('opacity', 1.0);
+                    node.selectAll("text").remove();
+                    node.append("text")
+                        .attr("dx", 12)
+                        .attr("dy", ".35em")
                         .text(function (d) {
-                            return d.title;
+                            if (d.data_type === "author") return d['author'];
+                            else return "";
                         });
+                })
+                .on("click", function (d) {
+                    if (d.data_type === "paper") {
+                        // clear searchResult
+                        searchResult = null;
+
+                        // put new selected paper
+                        selectedPaper = findSelectedTitle(d.title);
+
+                        getCitations();
+                        updateText();
+                        updatePaperDetails();
+                        updateSubPaperView();
+                        updateAuthorsView();
+                        updateAuthorTitle();
+
+                        d3.event.stopPropagation();
+                    }
+                })
+                .call(force.drag);
+
+            node.append("text")
+                .attr("dx", 12)
+                .attr("dy", ".35em")
+                .text(function (d) {
+                    if (d.data_type === "author") return d['author'];
+                    else return "";
+                });
+
+            var authorCount = 0;
+            node.each(function (d) {
+                if (d.data_type === "author") {
+                    d3.select(this).append("image")
+                        .attr("xlink:href", function (d) {
+                            if (d.data_type === "author") return "user.svg";
+                            else if (d.data_type === "paper") return "paper.svg";
+                            //else if (d.data_type === "paper") return "null";
+                        })
+                        .attr("x", -15)
+                        .attr("y", -15)
+                        .attr("width", 30)
+                        .attr("height", 30)
+                        //.attr("opacity", 0.5)
+                    ;
+                } else {
+                    d3.select(this).append("path")
+                        .attr("d", d3.svg.symbol()
+                            .type(function (d) {
+                                if (d.data_type === "author") {
+                                    return "triangle-up";
+                                }
+                                else if (d.data_type === "paper") {
+                                    return "circle";
+                                }
+                            })
+                            .size(function (d) {
+                                if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title) {
+                                    return 200;
+                                } else
+                                    return citationScale(d.citedCount);
+                                    //return 100;
+                            }))
+                        .style("fill", function (d) {
+                            if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title)
+                                return "red";
+                            else if (d.data_type === "author") {
+                                return "Orange";
+                            }
+                            else return "ForestGreen";
+                        })
+                        .style("stroke", "grey")
+                        .style("stroke-width", "1")
+                    ;
                 }
-            })
-            .on("mouseout", function() {
-                link.style('stroke-width', 1)
-                    .style('stroke', "rgb(216, 216, 216)")
-                    .style('stroke-opacity', 1.0)
-                ;
-                node.style('opacity', 1.0);
-                node.selectAll("text").remove();
-                node.append("text")
-                    .attr("dx", 12)
-                    .attr("dy", ".35em")
-                    .text(function(d) {
-                        if (d.data_type === "author" ) return d['author'];
-                        else return "";
-                    });
-            })
-            .on("click", function(d) {
-                if (d.data_type === "paper")
-                {
-                    // clear searchResult
-                    searchResult = null;
 
-                    // put new selected paper
-                    selectedPaper = findSelectedTitle(d.title);
-
-                    getCitations();
-                    updateText();
-                    updatePaperDetails();
-                    updateSubPaperView();
-                    updateAuthorsView();
-                    updateAuthorTitle();
-
-                    d3.event.stopPropagation();
+                //console.log(d);
+                if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title) {
+                    d3.select(this).classed("fixed", d.fixed = true);
+                    d['px'] = 500;
+                    d['py'] = 265;
+                } else if (d.data_type === "author") {
+                    d3.select(this).classed("fixed", d.fixed = true);
+                    d['px'] = 500 + (250 + 100) * Math.cos(authorCount / getAuthors(selectedPaper).length * 6.28 + 0.11);
+                    d['py'] = 265 + (5 * authorCount + 100) * Math.sin(authorCount / getAuthors(selectedPaper).length * 6.28 + 0.11);
+                    authorCount++;
                 }
-            })
-            .call(force.drag);
-
-        node.append("text")
-            .attr("dx", 12)
-            .attr("dy", ".35em")
-            .text(function(d) {
-                if (d.data_type === "author" ) return d['author'];
-                else return "";
             });
 
-        var authorCount = 0;
-        node.each(function (d) {
-            if (d.data_type === "author" ) {
-                d3.select(this).append("image")
-                    .attr("xlink:href", function(d) {
-                        if (d.data_type === "author" ) return "user.svg";
-                        else if (d.data_type === "paper") return "paper.svg";
-                        //else if (d.data_type === "paper") return "null";
+            force.on("tick", function () {
+                link.attr("x1", function (d) {
+                    return d.source.x;
+                })
+                    .attr("y1", function (d) {
+                        return d.source.y;
                     })
-                    .attr("x", -15)
-                    .attr("y", -15)
-                    .attr("width", 30)
-                    .attr("height", 30)
-                    //.attr("opacity", 0.5)
-                ;
-            } else {
-                d3.select(this).append("path")
-                    .attr("d", d3.svg.symbol()
-                        .type(function(d) {
-                            if (d.data_type === "author" ) {return "triangle-up";}
-                            else if (d.data_type === "paper") {return "circle";}
-                        })
-                        .size(function(d) {
-                            if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title) {
-                                return 200;
-                            } else
-                                return 100;
-                        }))
-                    .style("fill", function(d) {
-                        if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title)
-                            return "red";
-                        else if (d.data_type === "author" ) {return "Orange";}
-                        else return "ForestGreen";
+                    .attr("x2", function (d) {
+                        return d.target.x;
                     })
-                    .style("stroke", "grey")
-                    .style("stroke-width", "1")
-                ;
-            }
+                    .attr("y2", function (d) {
+                        return d.target.y;
+                    });
 
-            //console.log(d);
-            if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title ) {
-                d3.select(this).classed("fixed", d.fixed = true);
-                d['px'] = 500;
-                d['py'] = 265;
-            } else if (d.data_type === "author") {
-                d3.select(this).classed("fixed", d.fixed = true);
-                d['px'] = 500 + (250 + 100)*Math.cos(authorCount/getAuthors(selectedPaper).length*6.28+0.11);
-                d['py'] = 265 + (5*authorCount + 100)*Math.sin(authorCount/getAuthors(selectedPaper).length*6.28+0.11);
-                authorCount++;
-            }
-        });
-
-
-        //node.append("image")
-        //    .attr("xlink:href", function(d) {
-        //        if (d.data_type === "author" ) return "user.svg";
-        //        else if (d.data_type === "paper") return "paper.svg";
-        //        //else if (d.data_type === "paper") return "null";
-        //    })
-        //    .attr("x", -15)
-        //    .attr("y", -15)
-        //    .attr("width", 30)
-        //    .attr("height", 30)
-        //    .attr("opacity", 0.5)
-        //;
-
-        //node.append("path")
-        //    .attr("d", d3.svg.symbol()
-        //        .type(function(d) {
-        //            if (d.data_type === "author" ) {return "triangle-up";}
-        //            else if (d.data_type === "paper") {return "circle";}
-        //        })
-        //        .size(function(d) {
-        //            if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title) {
-        //                return 300;
-        //            } else
-        //                return 100;
-        //        }))
-        //    .style("fill", function(d) {
-        //        if (d.data_type === "paper" && forceGraphMapping[d._id] == selectedPaper.title)
-        //            return "red";
-        //        else if (d.data_type === "author" ) {return "Orange";}
-        //        else return "ForestGreen";
-        //    })
-        //    .style("stroke", "grey")
-        //    .style("stroke-width", "1")
-        //;
-
-        force.on("tick", function () {
-            link.attr("x1", function (d) {return d.source.x;})
-                .attr("y1", function (d) {return d.source.y;})
-                .attr("x2", function (d) {return d.target.x;})
-                .attr("y2", function (d) {return d.target.y;});
-
-            node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-        });
-
+                node.attr("transform", function (d) {
+                    return "translate(" + d.x + "," + d.y + ")";
+                });
+            });
+        }
     }
+}
+
+function createAuthorsView () {
+    force = d3.layout.force()
+        .charge(-200)
+        .linkDistance(80)
+        .friction(0.9)
+        .gravity(0.0)
+        .size([1000, 530]);
+
+    aViewBaseSvg = d3.select("#aView").append("svg")
+            .attr("width", 1000)
+            .attr("height", 530)
+        ;
+
+    updateAuthorsView();
 }
 
 function isConnected(d) {
