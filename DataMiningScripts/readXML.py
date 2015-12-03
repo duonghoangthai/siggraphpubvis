@@ -241,7 +241,7 @@ class PaperKeyword(JSONEncoder):
 all_papers_keywords = []
 for paper in all_papers_sorted:
     pk = PaperKeyword()
-    for k in p.keywords:
+    for k in paper.keywords:
         if k in keyword_id:
             pk.keywords.append(keyword_id[k])
     all_papers_keywords.append(pk)
