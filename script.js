@@ -25,7 +25,10 @@ var abstractData,
     forceGraphMapping,
     connected,
     force,
-    aViewBaseSvg
+    aViewBaseSvg,
+    keywordData,
+    keywords,
+    keywordStringList
 ;
 
 /**
@@ -512,6 +515,11 @@ d3.json("Data/all_papers_abs.json", function (error, loadedData) {
     abstractData = loadedData;
 });
 
+d3.json("Data/paper_keywords.json", function (error, loadedData) {
+    if (error) throw error;
+    keywordData = loadedData;
+});
+
 // Load the keywords
 (function loadKeywords() {
     queue().defer(d3.json, 'Data/keyword_graph.json').await(keywordsLoaded);
@@ -519,6 +527,8 @@ d3.json("Data/all_papers_abs.json", function (error, loadedData) {
 function keywordsLoaded(error, data) {
     if (error) throw error;
     var keywordVis = new KeywordVis(data);
+    keywords = keywordVis.keywordGraph.vertices;
+    //console.log(keywordVis.keywordGraph.vertices);
 }
 
 function updateText() {
@@ -826,6 +836,10 @@ function clearSelectedPaper() {
     updateText();
 }
 
+function clickKeyword(d) {
+    console.log(d);
+}
+
 function updatePaperDetails() {
 
     d3.select("#pDetails").selectAll("div").remove();
@@ -839,12 +853,22 @@ function updatePaperDetails() {
         for (var i = 1; i < getAuthors(selectedPaper).length; i++)
             authorsList += ( span20 + selectedPaper.authors[i]);
 
+        keywordStringList = [];
+        for (var i = 0; i < keywordData[selectedPaper.id].keywords.length; i++)
+            keywordStringList.push(keywords[keywordData[selectedPaper.id].keywords[i]].text);
+        keywordStringList.sort();
+
+        var keywordsList = "<a href=\"#keywordView\" onclick=\"clickKeyword(keywordStringList[0])\">" + keywordStringList[0] +"</a>";
+        for (var i = 1; i < keywordStringList.length; i++)
+            keywordsList += ', ' + "<a href=\"#keywordView\" onclick=\"clickKeyword(keywordStringList["+i+"])\">" +keywordStringList[i]+"</a>";
+
         div.html(
             "<h1>" + (selectedPaper.title) + "</h1>" +
             "<p>" + (authorsList) + "</p>" +
             "<h3> Abstract </h3>" +
             "<p  align=\"left\">" + (abstract) + "</p>" +
-            "<p  align=\"left\">" + "Keywords:" + "</p>" +
+            "<p  align=\"left\">" + "Keywords: " +
+              keywordsList + "</p>" +
             "<p  align=\"left\">" + "Year: "+ selectedPaper.year + span20 + "Cited by " + selectedPaper.cited_count + "</p>" +
             "<p  align=\"left\">" + "External Link: " +
             "<a href=\"" + selectedPaper.link + "\">" + selectedPaper.link + "</a></p>"
