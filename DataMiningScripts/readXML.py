@@ -230,7 +230,7 @@ all_papers_sorted.sort(key=lambda x : x.id)
 keyword_occurences = filter(lambda x: keyword_occurences[x] > 4 and x not in banned_keywords, keyword_occurences)
 keyword_id = {} # map a keyword to its id
 kid = 0
-for k in keyword_occurences:
+for k in sorted(keyword_occurences):
     keyword_id[k] = kid
     kid += 1
 
@@ -275,7 +275,7 @@ for k, i in keyword_id.iteritems():
     v.papers = keyword_paper_map[k]
     keyword_graph.vertices.append(v)
 
-for (k, l) in keyword_map.iteritems():
+for (k, l) in sorted(keyword_map.iteritems()):
     e = Neighbors()
     c = Counter(l)
     for (x, n) in c.iteritems():

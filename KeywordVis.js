@@ -134,6 +134,7 @@ KeywordVis.prototype.update = function() {
     });
     text.on("click", function(d, i) {
         var index = selected_keywords.indexOf(i);
+        console.log(self.keywordGraph.vertices[i].text);
         if (index === -1) { // click on new keyword
             selected_keywords.push(i);
             neighbor_keywords = neighbor_keywords.concat(self.keywordGraph.edges[i].neighbors);
