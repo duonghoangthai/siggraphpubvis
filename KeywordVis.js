@@ -3,7 +3,6 @@
  */
 function KeywordVis(keywordGraph) {
     this.svg = d3.select("#kView svg");
-    console.log(this.svg);
     this.keywordView = this.svg.append("g");
     this.keywordGraph = keywordGraph;
 
@@ -14,6 +13,7 @@ function KeywordVis(keywordGraph) {
 mouseover_item = -1;
 neighbor_keywords = [];
 selected_keywords = [];
+search_text = ""
 KeywordVis.prototype.init = function() {
     var border_x = 25;
     var border_y = 25;
@@ -88,8 +88,11 @@ KeywordVis.prototype.update = function() {
     var func = function(d, i) {
         var x = Math.floor(i / 32);
         var y = i % 32;
-        if (mouse_y == y && x != mouse_x && Math.abs(x - mouse_x) <= 3)
+        if (mouse_y === y && x !== mouse_x && Math.abs(x - mouse_x) <= 3) {
             return "0.1";
+        } else if (search_text !== "" && d.text.indexOf(search_text) !== 0) {
+            return "0.1";
+        }
         return "1";
     };
 
@@ -138,6 +141,12 @@ KeywordVis.prototype.update = function() {
                 neighbor_keywords.splice(neighbor_index, self.keywordGraph.edges[i].neighbors.length);
             }
         }
+        self.update();
+    });
+
+    var searchBox = d3.select("#searchKeyword");
+    searchBox.on("keyup", function(event) {
+        search_text = searchBox[0][0].value;
         self.update();
     });
     this.svg.on("mouseleave", function(d) { mouseover_item = -1; self.update(); });
