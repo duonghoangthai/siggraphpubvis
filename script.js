@@ -1368,3 +1368,54 @@ function findSelectedTitle(t) {
     }
     return result;
 }
+
+function updateByKeywords() {
+    //console.log(selected_keywords);
+    selectedPaper = null;
+    references = [];
+    citedBy = [];
+    searchResult = [];
+    maxPaperCitationOnSelected = 0;
+
+    for (var year = 2002; year < 2016; year++) {
+        if (paperData.hasOwnProperty(year.toString())) {
+            (function () {
+                var i, j;
+                for (i = 0; i < paperData[year].length; i++) {
+                    var found = false;
+                    for (j = 0; j < keywordData[paperData[year][i].id].keywords.length; j++) {
+                        if (selected_keywords.indexOf(keywordData[paperData[year][i].id].keywords[j]) > -1) {
+                            found = true;
+                        }
+                    }
+
+                    if (found) {
+                        searchResult.push(paperData[year][i]);
+                        maxPaperCitationOnSelected = Math.max(getCitedCount(paperData[year][i]), maxPaperCitationOnSelected);
+                        paperData[year][i]['isTarget'] = true;
+                    } else {
+                        paperData[year][i]['isTarget'] = false;
+                    }
+                }
+            })();
+        }
+    }
+
+    // cannot find matching paper
+    if (searchResult.length == 0)
+        searchResult = null;
+
+    // only on matching paper, set it as selected paper
+    else if (searchResult.length == 1) {
+        selectedPaper = searchResult[0];
+        searchResult = null;
+
+        getCitations();
+        updatePaperDetails();
+        updateSubPaperView();
+        updateAuthorsView();
+        updateAuthorTitle();
+    }
+
+    updateText();
+}

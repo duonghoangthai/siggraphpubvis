@@ -145,6 +145,7 @@ KeywordVis.prototype.update = function() {
                 neighbor_keywords.splice(neighbor_index, self.keywordGraph.edges[i].neighbors.length);
             }
         }
+        updateByKeywords();
         self.update();
     });
 
