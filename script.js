@@ -28,7 +28,8 @@ var abstractData,
     aViewBaseSvg,
     keywordData,
     keywords,
-    keywordStringList
+    keywordStringList,
+    aViewDiv
 ;
 
 /**
@@ -844,22 +845,23 @@ function updatePaperDetails() {
 
     d3.select("#pDetails").selectAll("div").remove();
 
+    var i;
     var div =  d3.select("#pDetails").append("div");
     var span20 = "<span style=\"padding-left:20px\"></span>";
     if (selectedPaper) {
         var abstract = getAbstract(abstractData[selectedPaper.id]);
 
         var authorsList = selectedPaper.authors[0];
-        for (var i = 1; i < getAuthors(selectedPaper).length; i++)
+        for (i = 1; i < getAuthors(selectedPaper).length; i++)
             authorsList += ( span20 + selectedPaper.authors[i]);
 
         keywordStringList = [];
-        for (var i = 0; i < keywordData[selectedPaper.id].keywords.length; i++)
+        for (i = 0; i < keywordData[selectedPaper.id].keywords.length; i++)
             keywordStringList.push(keywords[keywordData[selectedPaper.id].keywords[i]].text);
         keywordStringList.sort();
 
         var keywordsList = "<a href=\"#keywordView\" onclick=\"clickKeyword(keywordStringList[0])\">" + keywordStringList[0] +"</a>";
-        for (var i = 1; i < keywordStringList.length; i++)
+        for (i = 1; i < keywordStringList.length; i++)
             keywordsList += ', ' + "<a href=\"#keywordView\" onclick=\"clickKeyword(keywordStringList["+i+"])\">" +keywordStringList[i]+"</a>";
 
         div.html(
@@ -884,9 +886,7 @@ function updateAuthorTitle() {
 
     var div =  d3.select("#authorViewTitle").append("div");
     if (selectedPaper) {
-        div.html(
-            "<h1>" + (selectedPaper.title) + "</h1>"
-        );
+        div.html("<h1>" + (selectedPaper.title) + "</h1>");
     } else {
         div.html("<h1>" + "No paper selected" + "</h1>");
     }
@@ -1049,6 +1049,7 @@ function updateAuthorsView () {
                                             "_type": "vertex",
                                             "data_type": "paper",
                                             "title": paperData[year][i].title,
+                                            "year": year,
                                             "citedCount": getCitedCount(paperData[year][i])
                                         };
                                         maxCitedCount = Math.max(getCitedCount(paperData[year][i]), maxCitedCount);
@@ -1066,7 +1067,7 @@ function updateAuthorsView () {
 
         var citationScale = d3.scale.linear()
             .domain([0, maxCitedCount])
-            .range([50, 400]);
+            .range([50, 500]);
 
         for (var i = 0; i < getAuthors(selectedPaper).length; i++) {
             var tmp = {
@@ -1175,6 +1176,19 @@ function updateAuthorsView () {
                             .text(function (d) {
                                 return d.title;
                             });
+
+
+                        aViewDiv.transition()
+                            .duration(200)
+                            .style("opacity", .7);
+
+                        var span10 = "<span style=\"padding-left:10px\"></span>";
+                        aViewDiv.html("<p style=\"font-size:12px\"> Siggraph: " + (d.year) + span10 + "Cited count: " + (d.citedCount) + "<\p>")
+                            //+ "<p style=\"font-size:8px\"> cited count: " + (d.citedCount) + "<\p>")
+                            .style("left", 900 + "px")
+                            .style("top", 2680 + "px")
+                            .style("background", 'LightGrey')
+                        ;
                     }
                 })
                 .on("mouseout", function () {
@@ -1191,6 +1205,10 @@ function updateAuthorsView () {
                             if (d.data_type === "author") return d['author'];
                             else return "";
                         });
+
+                    aViewDiv.transition()
+                        .duration(500)
+                        .style("opacity", 0);
                 })
                 .on("click", function (d) {
                     if (d.data_type === "paper") {
@@ -1206,6 +1224,10 @@ function updateAuthorsView () {
                         updateSubPaperView();
                         updateAuthorsView();
                         updateAuthorTitle();
+
+                        aViewDiv.transition()
+                            .duration(500)
+                            .style("opacity", 0);
 
                         d3.event.stopPropagation();
                     }
@@ -1312,6 +1334,11 @@ function createAuthorsView () {
     aViewBaseSvg = d3.select("#aView").append("svg")
             .attr("width", 1000)
             .attr("height", 530)
+        ;
+
+    aViewDiv =  d3.select("#aView").append("div")
+        .attr("class", "authorViewToolTip")
+        .style("opacity", 0)
         ;
 
     updateAuthorsView();
