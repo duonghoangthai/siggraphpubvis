@@ -12,9 +12,8 @@ function KeywordVis(keywordGraph) {
 }
 
 mouseover_item = -1;
-selected_keyword = -1;
 neighbor_keywords = [];
-
+selected_keywords = [];
 KeywordVis.prototype.init = function() {
     var border_x = 25;
     var border_y = 25;
@@ -62,9 +61,30 @@ KeywordVis.prototype.init = function() {
         .text(function(d) { return d.text; });
 }
 
+// Find a sub-array from an array
+var find_subarray = function (arr, subarr, from_index) {
+    from_index = from_index || 0;
+
+    var i, found, j;
+    var last_check_index = arr.length - subarr.length;
+    var subarr_length = subarr.length;
+
+    position_loop:
+        for (i = from_index; i <= last_check_index; ++i) {
+            for (j = 0; j < subarr_length; ++j) {
+                if (arr[i + j] !== subarr[j]) {
+                    continue position_loop;
+                }
+            }
+            return i;
+        }
+    return -1;
+};
+
 KeywordVis.prototype.update = function() {
     var mouse_x = Math.floor(mouseover_item / 32);
     var mouse_y = mouseover_item % 32;
+
     var func = function(d, i) {
         var x = Math.floor(i / 32);
         var y = i % 32;
@@ -95,7 +115,7 @@ KeywordVis.prototype.update = function() {
         .attr("fill", function(d, i) {
             if (i === mouseover_item) {
                 return "rgb(150, 90, 78)";
-            } else if (i === selected_keyword) {
+            } else if (selected_keywords.indexOf(i) > -1) {
                 return "rgb(250, 80, 80)";
             }
             return "rgb(20, 20, 20)";
@@ -107,16 +127,17 @@ KeywordVis.prototype.update = function() {
         mouseover_item = i; self.update();
     });
     text.on("click", function(d, i) {
-       console.log(i);
-       if (i != selected_keyword) {
-           selected_keyword = i;
-           neighbor_keywords = self.keywordGraph.edges[i].neighbors;
-           console.log(neighbor_keywords);
-       } else {
-           selected_keyword = -1;
-           neighbor_keywords = [];
-       }
-        console.log(selected_keyword);
+        var index = selected_keywords.indexOf(i);
+        if (index === -1) { // click on new keyword
+            selected_keywords.push(i);
+            neighbor_keywords = neighbor_keywords.concat(self.keywordGraph.edges[i].neighbors);
+        } else { // click on an already selected keyword
+            selected_keywords.splice(index, 1);
+            var neighbor_index = find_subarray(neighbor_keywords, self.keywordGraph.edges[i].neighbors, 0);
+            if (neighbor_index >= 0) {
+                neighbor_keywords.splice(neighbor_index, self.keywordGraph.edges[i].neighbors.length);
+            }
+        }
         self.update();
     });
     this.svg.on("mouseleave", function(d) { mouseover_item = -1; self.update(); });
