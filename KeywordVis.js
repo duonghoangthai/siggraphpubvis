@@ -5,7 +5,6 @@ function KeywordVis(keywordGraph) {
     this.svg = d3.select("#kView svg");
     this.keywordView = this.svg.append("g");
     this.keywordGraph = keywordGraph;
-
     this.init();
     this.update();
 }
@@ -14,6 +13,7 @@ mouseover_item = -1;
 neighbor_keywords = [];
 selected_keywords = [];
 search_text = ""
+num_rows = 29;
 
 var isalpha = function(c) { return 'a' <= c && c <= 'z'; };
 
@@ -30,8 +30,8 @@ KeywordVis.prototype.init = function() {
         .data(this.keywordGraph.vertices)
         .enter().append("g")
         .attr("transform", function(d, i) {
-            return "translate(" + Math.floor(i / 32) * text_width + ","
-                + (i % 32) * text_height + ")"});
+            return "translate(" + Math.floor(i / num_rows) * text_width + ","
+                + (i % num_rows) * text_height + ")"});
 
     cells.append("rect")
         .attr("width", text_width)
@@ -60,7 +60,7 @@ KeywordVis.prototype.init = function() {
         .attr("x", 5)
         .attr("y", function(d) { return 17; })
         .attr("fill", "rgb(20, 20, 20)")
-        .attr("font-size", function(d, i) { if (i === mouseover_item) return "10px"; else return "19px"; })
+        .attr("font-size", function(d, i) { return "14px"; })
         .text(function(d) { return d.text; });
 }
 
@@ -85,13 +85,14 @@ var find_subarray = function (arr, subarr, from_index) {
 };
 
 KeywordVis.prototype.update = function() {
-    var mouse_x = Math.floor(mouseover_item / 32);
-    var mouse_y = mouseover_item % 32;
+    var self = this;
+    var mouse_x = Math.floor(mouseover_item / num_rows);
+    var mouse_y = mouseover_item % num_rows;
 
     var func = function(d, i) {
-        var x = Math.floor(i / 32);
-        var y = i % 32;
-        if (mouse_y === y && x !== mouse_x && Math.abs(x - mouse_x) <= 3) {
+        var x = Math.floor(i / num_rows);
+        var y = i % num_rows;
+        if (mouse_y === y && x !== mouse_x && Math.abs(x - mouse_x) <= 1) {
             return "0.1";
         } else if (search_text !== "" && d.text.indexOf(search_text) !== 0) {
             return "0.1";
@@ -127,7 +128,6 @@ KeywordVis.prototype.update = function() {
             return "rgb(20, 20, 20)";
         });
 
-    var self = this;
     text.on("mouseover", function(d, i) {
         //d3.select(this).transition().duration(1000).attr("fill", "rgb(150, 90, 78)");
         mouseover_item = i; self.update();
