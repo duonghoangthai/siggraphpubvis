@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Process Book</title>
+
+    <style>
+        #links > line {
+            stroke: rgb(216, 216, 216);
+        }
+
+        .overlay{
+            /*background-color:#EEE;*/
+            background-color:white;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+            /*stroke-dasharray: 2,2;*/
+        }
+
+        /* Styles that clean up the layout;
+         * you can ignore these: */
+
+        h2 {
+            margin: 10px;
+        }
+
+        /*div {*/
+            /*display: inline-block;*/
+            /*/!*border: 1px solid lightgray;*!/*/
+            /*/!*margin: 10px;*!/*/
+        /*}*/
+
+        div.tooltip {
+            position: absolute;
+            text-align: center;
+            width: 300px;
+            height: 80px;
+            padding: 5px;
+            font: 12px sans-serif;
+            background: lightgrey;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        /*div,*/
+        /*span {*/
+        /*padding: 10px;*/
+        /*}*/
+
+        /*.viewport {*/
+        /*position: absolute;*/
+        /*top: 114px;*/
+        /*left: 979px;*/
+        /*overflow-y: auto;*/
+        /*width: 200px;*/
+        /*height: 460px;*/
+        /*}*/
+
+        .myButton {
+            outline:0;
+            background-color:#f9f9f9;
+            border-radius:4px;
+            border:1px solid #dcdcdc;
+            display:inline-block;
+            cursor:pointer;
+        }
+        .myButton:hover {
+            background-color:#e9e9e9;
+        }
+
+        /*svg {*/
+            /*border:1px solid black;*/
+        /*}*/
+        .keyword {
+            cursor: pointer;
+        }
+
+        .node text {
+            pointer-events: none;
+            font: 10px sans-serif;
+        }
+        .leadChar {
+            font: bold 40px tahoma;
+            cursor: pointer;
+        }
+
+        div.authorViewToolTip {
+            position: absolute;
+            text-align: center;
+            width: 300px;
+            height: 20px;
+            padding: 5px;
+            font: 12px sans-serif;
+            background: lightgrey;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+    </style>
+
+    <!-- d3 and my scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/my-page.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-fixed-top topnav" role="navigation">
+    <div class="container topnav">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand topnav" href="#">Siggraph Visualization</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#overview">Overview</a>
+                </li>
+                <li>
+                    <a href="#relatedWork">Related Work</a>
+                </li>
+                <li>
+                    <a href="#questions">Questions</a>
+                </li>
+                <li>
+                    <a href="#data">Data</a>
+                </li>
+                <li>
+                    <a href="#exploratoryDataAnalysis">Exploratory Data Analysis</a>
+                </li>
+                <li>
+                    <a href="#designEvolution">Design Evolution</a>
+                </li>
+                <li>
+                    <a href="#implementation">Implementation</a>
+                </li>
+                <li>
+                    <a href="#evaluation">Evaluation</a>
+                </li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+<!--<div class="content-section">-->
+    <!--<div class="container">-->
+        <!--<div class="row">-->
+                <!--<h1 style="text-align: center;">Process Book</h1>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+
+<div class="content-section" style="padding-bottom: 0px">
+    <div class="container">
+        <div class="row">
+            <h1 style="text-align: center;">Process Book</h1>
+        </div>
+    </div>
+</div>
+
+
+<a  name="overview"></a>
+<div class="content-section" style="padding-bottom: 0px">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2 style="text-align: left;">Overview</h2>
+                <p> When surveying a new field, researchers often want an overview look at the important papers in the field, how they are related, and how popular trends in topics or techniques have been evolving over the years. Traditional search engines such as Google Scholar and digital libraries such as the ACM's can alleviate the task, but only when the researcher has a good idea of what he should look for. Even then, the information obtained from those tools at any given moment is not only too specific but also presented in a non-visual form, making it difficult for the user to see a bigger picture. </p>
+                <p> Being both interested in doing research in computer graphics, in this project we aim to develop a tool to visualize connections between papers published over the years in SIGGRAPH, the most important conference in computer graphics. The tool should show in one place: the citation relationships among SIGGRAPH papers, important papers in each sub-field, prolific authors and their collaboration patterns, popular topics and methods in recent years, and active research institutions in each sub-field. It is our hope that such a tool can be particularly helpful to someone who wants to survey a field and summarize major results. It could also help new researchers in finding not only interesting problems to work on but also pointers to relevant publications for reference. Lastly, prospective graduate students can use information provided by the tool to make more informed decision in their application process. </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a  name="relatedWork"></a>
+<div class="content-section" style="padding-bottom: 0px">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2 style="text-align: left;">Related Work</h2>
+                <p> When searching for project ideas, we stumbled upon Autodesk's <a href="http://www.autodeskresearch.com/projects/citeology">Citeology</a> and this work gives us motivations to propose the current project. More tools to visualize connections between academic publications can be found in <a href="http://proto-knowledge.blogspot.com/2015/02/tools-to-visualize-connections-between.html">here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a  name="questions"></a>
+<div class="content-section" style="padding-bottom: 0px">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2 style="text-align: left;">Questions</h2>
+                <p>Our project aims to answer the following questions:</p>
+                <ul>
+                    <li>What papers are influential in the field, in terms of citation count?</li>
+                    <li>Given a paper of interest, what papers does it cite? What are the papers citing it?</li>
+                    <li>What topics and techniques are popular, and in which time periods?</li>
+                    <li>Given a set of keywords, what are the most relevant papers / authors / institutions to these keywords?</li>
+                    <li>Who does each author collaborate with the most?</li>
+                    <li>What institutions are more active in a given field, in terms of publication count?</li>
+                </ul>
+                <p>Answering the above questions will put a make a researcher more informed about what papers / authors / topics / techniques to pay more attention to, thereby saving time in the beginning of a survey task. It can also reveal interesting patterns and trends in the past that can help him or her better decide on future research directions for a particular topic of interest.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a  name="data"></a>
+<div class="content-section" style="padding-bottom: 0px">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2 style="text-align: left;">Data</h2>
+                <p>Our data comes from multiple sources:</p>
+                <ul>
+                    <li>Paper texts are downloaded from <a href="http://dl.acm.org/"> ACM Digital Library</a>. From these we extract the title, authors and their affiliations, references, and important keywords.</li>
+                    <li>BibTeX information for all papers is downloaded from <a href="http://dblp.uni-trier.de/db/">Digital Bibliographic Library Browser</a>.</li>
+                    <li>Citation count information is queried from <a href="https://scholar.google.com/">Google Scholar</a>.</li>
+                </ul>
+                <p>Answering the above questions will put a make a researcher more informed about what papers / authors / topics / techniques to pay more attention to, thereby saving time in the beginning of a survey task. It can also reveal interesting patterns and trends in the past that can help him or her better decide on future research directions for a particular topic of interest.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a  name="exploratoryDataAnalysis"></a>
+<div class="content-section" style="padding-bottom: 0px">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2 style="text-align: left;">Exploratory Data Analysis</h2>
+                <p>We expect our raw data to require a substantial cleanup process. So far we have collected all the SIGGRAPH papers's pdf files from 2002 to 2015, totaling 17GB of data. These pdf files will be converted to text format, from which we will extract from each paper its title, authors and their affiliations, references and keywords. The extraction process is done using a combination of homemade Python scripts and opensource tools such as <a href="http://aye.comp.nus.edu.sg/parsCit/">ParsCit</a>.</p>
+                <p>Meaningful keyword extraction is the most difficult step of the extraction process. Most papers provide a set of "keywords" after the abstract but in our experience, these keywords are not meaningful enough: in any given year, most keywords are used by only one paper. We are looking into using an auto-summarizing tools for this step. Because of the uncertainty of keyword extraction, all features that require keywords will be optional.</p>
+                <p>We have done cursory testing of our tools and they seemed to be able to extract the required information with high accuracy, thanks to the uniformity in format of the papers. There is still some chance that noise will show up in the extracted data, in which case some post-process cleaning has to be done. We will finally need to remove all non-SIGGRAPH papers from the list of references to make our data more self-contained and easier to work with.</p>
+                <p>Since our data is highly relational, we plan to store it in an SQL database and query the data with Javascript. At the moment <a href="https://github.com/kripken/sql.js/">sql.js</a> and <a href="https://github.com/mapbox/node-sqlite3">node-sqlite3</a> seem to be promising candidates. Tentatively, there will be different tables, one for each of the following: papers, authors, institutions, keywords. Each entry in a table will have necessary fields, for example a paper will contain links to its authors and keywords, an author entry will have links back to his or her papers, and (optionally) links to the institution where he/she worked when a paper was published.</p>
+                <p>An alternative design is to flatten all the SQL tables into JSON files and load those instead. The SQL approach allows us to not having to load everything into memory at once, perhaps at the cost of more processing time each time users change their query/filter of the data. It is not yet clear to us how big the data will be, and which one of the two approaches will work better.</p>
+                <p>Our data acquisition and processing pipeline is as follows:</p>
+                <ul>
+                    <li>We start by downloading all SIGGRAPH publications (in PDF format) since 2002 from the ACM Digital Library. </li>
+                    <li>Download BibTeX files (in XML format) for all SIGGRAPH and TOG papers from the Digital Bibliographic Library Browser.</li>
+                    <li>Use a PDF processing tool to perform OCR and convert all the PDF files to TXT.</li>
+                    <li>Based on the TXT files, use ParsCit to extract the title and abstract from each paper.</li>
+                    <li>Use a homegrown tool (written in Python) to extract the list of references from each paper.</li>
+                    <li>Use another homegrown tool (in Python) to query Google Scholar to get the number of citations for all papers. This step is needed because we want to account for citations from non-SIGGRAPH papers as well.</li>
+                    <li>To extract the keywords, we use a Web service called Alchemy API (from IBM). The keywords returned by this tool will be combined with the keywords extracted directly from each paper's Keywords section.</li>
+                    <li>Finally we use a Python script to combine all the extracted information into a data structure in memory, from which we write several JSON files ready to be used by our Vis scripts.</li>
+                </ul>
+                <p>At the moment, we have finished extracting all the essential information (title, author, year, references, citation count, DOI link) from our paper database, and produced working JSON files that have been used in our prototype. Below is an excerpt from our main JSON file:</p>
+                <p>"2002": [
+                    {
+                    "authors": [
+                    "Jeffrey Smith",
+                    "Jessica K. Hodgins",
+                    "Irving Oppenheim",
+                    "Andrew P. Witkin"
+                    ],
+                    "cited_by": [
+                    1349,
+                    1384,
+                    1543,
+                    1752,
+                    1704,
+                    1846
+                    ],
+                    "id": 69,
+                    "link": "http://doi.acm.org/10.1145/566654.566580",
+                    "references": [],
+                    "title": "Creating models of truss structures with optimization",
+                    "year": "2002"
+                    }, {
+                    "authors": [
+                    "Timothy J. Purcell",
+                    "Ian Buck",
+                    "William R. Mark",
+                    "Pat Hanrahan"
+                    ],
+                    "cited_by": [
+                    163,
+                    124,
+                    134,
+                    93,
+                    120,
+                    190
+                    ],
+                    "id": 63,
+                    "link": "http://doi.acm.org/10.1145/566654.566640",
+                    "references": [],
+                    "title": "Ray tracing on programmable graphics hardware",
+                    "year": "2002"
+                    }, </p>
+                <p>This database will be updated once the keyword extraction step finishes, in at most two days, at which point there will be no data gathering tasks left. Compared to what was written in the proposal, it turned out that extracting the affiliation information for the authors from the paper texts is too difficult, hence we have decided to drop the Institution view from the project.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a  name="designEvolution"></a>
+<div class="content-section" style="padding-bottom: 0px">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2 style="text-align: left;">Design Evolution</h2>
+                <p>Our initial design consists of four different views:</p>
+                <ul>
+                    <li> <i style="font-size:17px">Paper View </i> <span style="padding-left:20px"></span>
+                        Here we show all the papers, grouped by year. Each year occupies one column. This view will be wide enough to show about ten years but will be scroll-able horizontally to move the focus to a different period of time. Each paper's title will appear on one row and be click-able. When a paper is clicked on, the papers that this paper cites and the ones that cite it will be highlighted. Moreover, when a paper is mouse over, a pop-up will show the paper's full title, author lists, keywords, and DOI link. A bar will appear right under each paper's title, the length of which is proportional to the paper's number of citations (this is not yet shown in our design sketches). This help the user identify influential papers at a glance. This whole paper view can be sorted either alphabetically or by citation count. The papers can also be filtered by citation count, to hide papers with lesser impacts. We provide two checkboxes and a slider for these purposes.</li>
+                    <li> <i style="font-size:17px">Institution View </i> <span style="padding-left:20px"></span>
+                        Here we show a map of all the institutions that have published papers to SIGGRAPH. They will appear as circles on a projected world map. The bigger the circle is, the more publications that institution has in the selected time period. Mousing over an institution will show its name and address. We chose a map for this view because for an institution, the geographical information can be important, for example, to a prospective graduate student looking for a school to apply to. Displaying a large amount of items using circles is also space-conserving.</li>
+                    <li> <i style="font-size:17px">Author View </i> <span style="padding-left:20px"></span>
+                        In this view we show all paper authors and their collaboration relationships as a node-link diagram. Each author is a node, and two authors are linked if they have written a paper together. Bigger nodes represent more prolific authors, in terms of some metrics such as the H-index. Mousing over an author will show his/her name and affiliations. The reason we chose a node-link diagram for this view is because it highlights quite nicely the clusters between subsets of nodes, and the view is dynamic so it is easier to put any author at the center (for example, when his paper is being selected).</li>
+                    <li> <i style="font-size:17px">Keyword View </i> <span style="padding-left:20px"></span>
+                        This view acts both as a view and a filter. Here we list all the keywords extracted from all the papers in alphabetical order. Keywords are selectable, and each time a keyword is clicked on, the related keywords are highlighted. This feature is particularly useful when the user clicks on a topic keyword (for example: "global illumination"), and the related keywords show common techniques used to solve problems related to that topic (for example: "path tracing", "radiosity", "photon mapping" which are common methods in graphics to achieve "global illumination"). Two keywords are related if they appear together in many papers. Moreover, selecting a set of keywords will reduce the amount of information shown in the other views, to retain only the papers/authors/institutions that are related to the selected set of keywords. This is useful because the list of papers/authors/institutions can be quite large. The following figure shows an initial design of this idea, where the list of papers was not really filtered by simply highlighted and re-sorted. This feature can be very interesting because a glance at the paper view can tell us the popularity of the current selected set of keywords throughout the years.</li>
+                </ul>
+                <p style="text-align: center;"><img alt="" src="./img/initial_design_selected.png" width='700' height='400'/></p>
+
+                <p>During data processing and implement, we realized that the amount of papers in the each year is quite large, which is about 150 papers per year. As a result, there is no way to arrange the entire paper view, 14 years and 100 papers per year, to one view with proper font size. The initial version of our implementation is shown as following figure.</p>
+                <p style="text-align: center;"><img alt="" src="./img/initial_design.png" width='700' height='300'/></p>
+
+                <p>There are two options to solve this issue. The first one is using zoom in and zoom out to let users explore paper views. We attempt to avoid that method because users may lose the entire view on their mind due to the change blindness. Hence, we added fisheye distortion to enable users to only zoom in texts in a small region as shown in the following Figure. However, the fisheye plugin we used is not suitable for zooming in texts. Also, because of the high density of texts, even if we rearrange texts to make it look better, it is still very messy for users to view.</p>
+                <p style="text-align: center;"><img alt="" src="./img/paper_view_fisheye.png" width='700' height='400'/></p>
+
+                <p>After that, we decided to add a side bar for the selected year papers. When users select one year, the side bar will show all papers in that year and allow users to scroll. We believe this should be the best solution for our issue without zoom in and out. Users can get details as well as overall view at the same time at least.</p>
+                <p style="text-align: center;"><img alt="" src="./img/paper_view_with_side_bar.png" width='700' height='280'/></p>
+
+                <p>However, we meet another question, which is how represent reference and citation relationship between papers in the paper view. As we mentioned before, it is too small to read and we cannot keep our original design. Fortunately, at the worst case, the total amount of reference and citation by one paper is 52. We determined to enlarge the font size of those papers and arrange them by stair shape as shown in following Figure. We use red and blue to highlight references and cited by papers for now.</p>
+                <p style="text-align: center;"><img alt="" src="./img/paper_view_reference_relationship.png" width='700' height='280'/></p>
+
+                <p>Besides that, we also implemented functions, like ``sort title by citation count'' and ``sort title by letter''. More functionalities will be added before final submission.</p>
+                <p>In the meantime, we also realized it is quite difficult to do a university maps view as we promised in the proposal because it is hard to get coordination of universities. So, we decided to get rid of it and add more functionalities to papers view instead, such as searching title. Meanwhile, we can spend more time on keyword view, which we believe is much more useful for users to explore papers. </p>
+                <p>After milestone 1, we still looked for a better implementation for paper view and attempted to implement our initial design by some alternative ways. Fortunately, we found using scrolling down/up to control zoom in/out is able to provide users a better view control and more freedom to explore the view. Figure below shows our final implementation. Moreover, we add zoom in/out button on the top left of the view to give users hint that the view is zoom-able. </p>
+                <p style="text-align: center;"><img alt="" src="./img/paper_view_final.png" width='700' height='280'/></p>
+
+                <p>Another benefit for zoom-able paper view is providing more apparently view for user to explore the cited and reference relationship between papers. The main drawback of this alternative is tool-tip may block several papers and cannot contain too many details. Therefore, we add another view for paper details, which include title, authors, abstract, year, keywords, and citation number. Also, in order to give users a brief idea about reference information, we also add a subset paper view here, which only displays the highlighted papers in the paper view. Users can also to use fisheye effect to see titles.</p>
+                <p style="text-align: center;"><img alt="" src="./img/paper_view_link.png" width='700' height='280'/></p>
+                <p style="text-align: center;"><img alt="" src="./img/paper_details.png" width='700' height='350'/></p>
+
+                <p>At last, we want mention that there are about 3500 nodes in the author view, 2200 authors and 1300 papers. It is unreadable if we put all nodes in the view at the same time. Alternatively, we only display the selected paper, its authors, and its authors' publications. Even though it is a much smaller set compared with original one, the view allows user to click and change the selected papers as well. Figure below demonstrates that mouse-over and tool-tip to show some paper details.</p>
+                <p style="text-align: center;"><img alt="" src="./img/author_view_with_tooltip.png" width='700' height='310'/></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a  name="implementation"></a>
+<div class="content-section" style="padding-bottom: 0px">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2 style="text-align: left;">Implementation</h2>
+                <p>Our project includes four view, paper view, paper details view, author view, and keyword view.</p>
+
+                <h4 style="text-align: left;">Paper View</h4>
+                <p>In paper view, we have we show all the papers, grouped by year. Each year occupies one column. This view is scroll-able horizontally to zoom in/out the view. Zoom in/out button is provided on the left top as well.</p>
+                <p style="text-align: center;"><img alt="" src="./img/paper_view_final.png" width='700' height='280'/></p>
+
+                <p>Papers' title appears on one row and be click-able. When a paper is clicked on, the papers that this paper cites and the ones that cite it will be highlighted with different color. Curved links are display to show the relationship between papers. Moreover, when a paper is mouse over, a pop-up will show the paper's full title, author lists. </p>
+                <p style="text-align: center;"><img alt="" src="./img/paper_view_link.png" width='700' height='280'/></p>
+                <p style="text-align: center;"><img alt="" src="./img/paper_view_zoom.png" width='700' height='280'/></p>
+
+
+                <p>This whole paper view can be sorted either alphabetically or by citation count. We provide a checkbox to display/hide citation count bar. The citation bar appears right under each paper's title, the length of which is proportional to the paper's number of citations and scaled within the year, because it is unfair to compare two papers published in different years. This help the user identify influential papers at a glance.</p>
+                <p style="text-align: center;"><img alt="" src="./img/paper_view_citation.png" width='700' height='280'/></p>
+
+                <p>There are also two search buttons, which allows user to search author name or paper title. If more than papers are returned, all of them will be highlighted as black. If only return one result, the result will set as selected paper and showing its reference.</p>
+                <p>Once paper is selected, paper details and author view will be updated correspondingly based on the selection.</p>
+
+                <h4 style="text-align: left;">Paper Details View</h4>
+                <p>Paper view shows all details about the selected paper, including title, authors, abstract, keywords, cited count, year, and its external link, which points to ACM web-site.</p>
+                <p>Keywords are click-able. Once keywords is clicked, it will be set as "selected" and update keyword view.</p>
+                <p>Also, in order to give users a brief idea about reference information, a subset paper view is added here, which only displays the highlighted papers in the paper view. Titles here also can be enlarged when mouse over it.</p>
+                <p style="text-align: center;"><img alt="" src="./img/paper_details.png" width='700' height='350'/></p>
+
+                <h4 style="text-align: left;">Author View</h4>
+                <p>Author view only displays the selected paper, its authors, and its authors' publications. Each green circle represents one paper and is scaled by its cited count.  Even though it is a much smaller set compared with original one, the view allows user to click and change the selected papers with transition.</p>
+                <p>When users mouse-over it, a tool-tip will show on the right bottom to show published year and cited count. In the mean time, other unconnected nodes will be transparent so to highlight mouse-over-ed paper and its author or  mouse-over-ed author and all his/her publications.</p>
+                <p style="text-align: center;"><img alt="" src="./img/author_view_with_tooltip.png" width='700' height='310'/></p>
+
+                <h4 style="text-align: left;">Keyword View</h4>
+                <p></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a  name="evaluation"></a>
+<div class="content-section" style="padding-bottom: 0px">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2 style="text-align: left;">Evaluation</h2>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="container text-center">
+        <p>Copyright &copy; 2015</p>
+    </div>
+</footer>
+
+
+<!-- jQuery -->
+<script src="js/jquery.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="js/bootstrap.min.js"></script>
+<script type="application/javascript" src="KeywordVis.js"></script>
+<script type="application/javascript" src="script.js"></script>
+<script type="application/javascript" src="fisheye.js"></script>
+<script type="application/javascript" src="virtualscroller.js"></script>
+</body>
+
+</html>
