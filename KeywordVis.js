@@ -14,6 +14,9 @@ mouseover_item = -1;
 neighbor_keywords = [];
 selected_keywords = [];
 search_text = ""
+
+var isalpha = function(c) { return 'a' <= c && c <= 'z'; };
+
 KeywordVis.prototype.init = function() {
     var border_x = 25;
     var border_y = 25;
@@ -47,7 +50,7 @@ KeywordVis.prototype.init = function() {
         .attr("fill-opacity","0.6")
         .attr("font-size", "40px")
         .text(function(d, i) {
-            if (i > 0 && d.text.slice(0, 1) != self.keywordGraph.vertices[i-1].text.slice(0, 1))
+            if (i > 0 && isalpha(d.text[0]) && d.text.slice(0, 1) != self.keywordGraph.vertices[i-1].text.slice(0, 1))
                 return d.text.slice(0, 1).toUpperCase();
             return "";
         });
