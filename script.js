@@ -131,7 +131,7 @@ function updateYearBar() {
 
     var zoomListener = d3.behavior.zoom()
         .center([xAxisWidth / 2, (titleBegin+50) / 2])
-        .scaleExtent([1, 5]).on("zoom", zoom);
+        .scaleExtent([1, 8]).on("zoom", zoom);
 
     function zoom() {
         svgGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
@@ -335,8 +335,8 @@ function updateYearBar() {
                             colorText = 'Black'
                         }
 
-                        div	.html( "<p style=\"color:" + colorText + "\">" + (d.title) +
-                            "<\p> <p style=\"font-size:8px; color:" + colorText + "\">" +authorsList + "<\p>")
+                        div	.html( "<p style=\"font-size:15px; color:" + colorText + "\">" + (d.title) +
+                            "<\p> <p style=\"font-size:10px; color:" + colorText + "\">" +authorsList + "<\p>")
                             .style("left", (d3.event.pageX) + "px")
                             .style("top", (d3.event.pageY - 28) + "px")
                             .style("background", 'LightGrey')
@@ -1040,6 +1040,11 @@ function updateSubPaperView() {
                             if (references.indexOf(d.id) > -1) return 'DodgerBlue';
                             return 'none';
                         }
+                    })
+                    .on("click", function (d) {
+                        //console.log(d);
+                        selectedPaper = d;
+                        updatePaperDetails();
                     })
                 ;
                 j++
