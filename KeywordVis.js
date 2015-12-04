@@ -107,7 +107,7 @@ KeywordVis.prototype.update = function() {
         .attr("fill-opacity", func)
         .attr("stroke-opacity", func)
         .attr("fill", function(d, i) {
-            if (neighbor_keywords.indexOf(i) > -1){
+            if (selected_keywords.indexOf(i) > -1){
                 return "rgb(150, 250, 250)";
             }
             return "rgb(248, 248, 248)";
@@ -122,7 +122,7 @@ KeywordVis.prototype.update = function() {
         .attr("fill", function(d, i) {
             if (i === mouseover_item) {
                 return "rgb(150, 90, 78)";
-            } else if (selected_keywords.indexOf(i) > -1) {
+            } else if (neighbor_keywords.indexOf(i) > -1) {
                 return "rgb(250, 80, 80)";
             }
             return "rgb(20, 20, 20)";
