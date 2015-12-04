@@ -160,7 +160,7 @@ for dir in next(os.walk(work_dir))[1]:
             # normalize the keywords
             keywords_set = set()
             for kw in keywords_array:
-                if float(kw['relevance']) >= 0.7: # skip keywords whose relevance is low
+                if float(kw['relevance']) >= 0.55: # skip keywords whose relevance is low
                     temp = "".join([c.lower() if c.isalnum() else " " for c in kw['text']])
                     temp = temp.split()
                     for k in temp:

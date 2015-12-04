@@ -13,15 +13,15 @@ mouseover_item = -1;
 neighbor_keywords = [];
 selected_keywords = [];
 search_text = ""
-num_rows = 29;
+num_rows = 38;
 
 var isalpha = function(c) { return 'a' <= c && c <= 'z'; };
 
 KeywordVis.prototype.init = function() {
-    var border_x = 25;
-    var border_y = 25;
+    var border_x = 10;
+    var border_y = 10;
     var text_width = 50;
-    var text_height = 25;
+    var text_height = 23;
 
     var cells = this.svg
         .append("g")
