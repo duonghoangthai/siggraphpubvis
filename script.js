@@ -1423,7 +1423,6 @@ function updateByKeywords() {
                     }
 
                     if (found) {
-                        console.log(keywordData[paperData[year][i].id].keywords);
                         searchResult.push(paperData[year][i]);
                         maxPaperCitationOnSelected = Math.max(getCitedCount(paperData[year][i]), maxPaperCitationOnSelected);
                         paperData[year][i]['isTarget'] = true;
