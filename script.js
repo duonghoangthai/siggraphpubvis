@@ -28,7 +28,9 @@ var abstractData,
     aViewBaseSvg,
     keywordData,
     keywords,
+    keywordEdges,
     keywordStringList,
+    keywordVis,
     aViewDiv
 ;
 
@@ -527,8 +529,9 @@ d3.json("Data/paper_keywords.json", function (error, loadedData) {
 })();
 function keywordsLoaded(error, data) {
     if (error) throw error;
-    var keywordVis = new KeywordVis(data);
+    keywordVis = new KeywordVis(data);
     keywords = keywordVis.keywordGraph.vertices;
+    keywordEdges = keywordVis.keywordGraph.edges;
     //console.log(keywordVis.keywordGraph.vertices);
 }
 
@@ -837,8 +840,22 @@ function clearSelectedPaper() {
     updateText();
 }
 
-function clickKeyword(d) {
-    console.log(d);
+function clickKeyword(i) {
+    //console.log(i);
+    var index = selected_keywords.indexOf(i);
+    //console.log(keywords[i].text);
+    if (index === -1) { // click on new keyword
+        selected_keywords.push(i);
+        neighbor_keywords = neighbor_keywords.concat(keywordEdges[i].neighbors);
+    } else { // click on an already selected keyword
+        selected_keywords.splice(index, 1);
+        var neighbor_index = find_subarray(neighbor_keywords, keywordEdges[i].neighbors, 0);
+        if (neighbor_index >= 0) {
+            neighbor_keywords.splice(neighbor_index, keywordEdges[i].neighbors.length);
+        }
+    }
+    updateByKeywords();
+    keywordVis.update();
 }
 
 function updatePaperDetails() {
@@ -855,14 +872,29 @@ function updatePaperDetails() {
         for (i = 1; i < getAuthors(selectedPaper).length; i++)
             authorsList += ( span20 + selectedPaper.authors[i]);
 
+        var tmp;
         keywordStringList = [];
-        for (i = 0; i < keywordData[selectedPaper.id].keywords.length; i++)
-            keywordStringList.push(keywords[keywordData[selectedPaper.id].keywords[i]].text);
-        keywordStringList.sort();
+        for (i = 0; i < keywordData[selectedPaper.id].keywords.length; i++) {
+            tmp = {"text":keywords[keywordData[selectedPaper.id].keywords[i]].text,
+            "id":keywordData[selectedPaper.id].keywords[i]};
+            keywordStringList.push(tmp);
+        }
+        keywordStringList.sort(function(a, b){
+            if (a.text < b.text )
+                return -1;
+            if (a.text > b.text )
+                return 1;
+            return 0;
+        });
 
-        var keywordsList = "<a href=\"#keywordView\" onclick=\"clickKeyword(keywordStringList[0])\">" + keywordStringList[0] +"</a>";
+        //console.log(keywordStringList);
+
+        //for (i = 0; i < keywordStringList.length; i++)
+        //    console.log(keywordStringList[i].text, keywordIdList[i].id);
+
+        var keywordsList = "<a href=\"#keywordView\" onclick=\"clickKeyword(keywordStringList[0].id)\">" + keywordStringList[0].text +"</a>";
         for (i = 1; i < keywordStringList.length; i++)
-            keywordsList += ', ' + "<a href=\"#keywordView\" onclick=\"clickKeyword(keywordStringList["+i+"])\">" +keywordStringList[i]+"</a>";
+            keywordsList += ', ' + "<a href=\"#keywordView\" onclick=\"clickKeyword(keywordStringList["+i+"].id)\">" +keywordStringList[i].text+"</a>";
 
         div.html(
             "<h1>" + (selectedPaper.title) + "</h1>" +
@@ -1367,4 +1399,55 @@ function findSelectedTitle(t) {
         }
     }
     return result;
+}
+
+function updateByKeywords() {
+    //console.log(selected_keywords);
+    selectedPaper = null;
+    references = [];
+    citedBy = [];
+    searchResult = [];
+    maxPaperCitationOnSelected = 0;
+
+    for (var year = 2002; year < 2016; year++) {
+        if (paperData.hasOwnProperty(year.toString())) {
+            (function () {
+                var i, j;
+                for (i = 0; i < paperData[year].length; i++) {
+                    var found = false;
+                    for (j = 0; j < keywordData[paperData[year][i].id].keywords.length; j++) {
+                        if (selected_keywords.indexOf(keywordData[paperData[year][i].id].keywords[j]) > -1) {
+                            found = true;
+                        }
+                    }
+
+                    if (found) {
+                        searchResult.push(paperData[year][i]);
+                        maxPaperCitationOnSelected = Math.max(getCitedCount(paperData[year][i]), maxPaperCitationOnSelected);
+                        paperData[year][i]['isTarget'] = true;
+                    } else {
+                        paperData[year][i]['isTarget'] = false;
+                    }
+                }
+            })();
+        }
+    }
+
+    // cannot find matching paper
+    if (searchResult.length == 0)
+        searchResult = null;
+
+    // only on matching paper, set it as selected paper
+    else if (searchResult.length == 1) {
+        selectedPaper = searchResult[0];
+        searchResult = null;
+
+        getCitations();
+        updatePaperDetails();
+        updateSubPaperView();
+        updateAuthorsView();
+        updateAuthorTitle();
+    }
+
+    updateText();
 }
