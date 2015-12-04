@@ -1177,7 +1177,9 @@ function updateAuthorsView () {
                 .attr("class", "node")
                 .on("mouseover", function (d) {
                     connected = [d];
-                    link.style('stroke-width', function (l) {
+                    link.transition()
+                        .duration(500)
+                        .style('stroke-width', function (l) {
                         if (d === l.source) {
                             connected.push(l.target);
                             return 1;
@@ -1197,7 +1199,9 @@ function updateAuthorsView () {
                             else return 0.5;
                         })
                     ;
-                    node.style('opacity', function (l) {
+                    node.transition()
+                        .duration(500)
+                        .style('opacity', function (l) {
                         if (isConnected(l)) return 1.0;
                         else return 0.2;
                     })
@@ -1211,7 +1215,7 @@ function updateAuthorsView () {
 
 
                         aViewDiv.transition()
-                            .duration(200)
+                            .duration(500)
                             .style("opacity", .7);
 
                         var span10 = "<span style=\"padding-left:10px\"></span>";

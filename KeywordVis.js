@@ -13,7 +13,7 @@ mouseover_item = -1;
 neighbor_keywords = [];
 selected_keywords = [];
 search_text = ""
-num_rows = 33;
+num_rows = 35;
 
 var isalpha = function(c) { return 'a' <= c && c <= 'z'; };
 
@@ -21,7 +21,7 @@ KeywordVis.prototype.init = function() {
     var border_x = 10;
     var border_y = 10;
     var text_width = 50;
-    var text_height = 23;
+    var text_height = 15;
 
     var cells = this.svg
         .append("g")
@@ -30,14 +30,14 @@ KeywordVis.prototype.init = function() {
         .data(this.keywordGraph.vertices)
         .enter().append("g")
         .attr("transform", function(d, i) {
-            return "translate(" + Math.floor(i / num_rows) * text_width + ","
+            return "translate(" + Math.floor(i / num_rows) * (text_width+1) + ","
                 + (i % num_rows) * text_height + ")"});
 
     cells.append("rect")
         .attr("width", text_width)
         .attr("height", text_height)
         .attr("stroke", "rgb(248, 248, 248)")
-        .attr("stroke-width", "8")
+        //.attr("stroke-width", "8")
         //.style("fill", "rgb(119, 119, 119)");
         .attr("fill", "rgb(248, 248, 248)");
 
@@ -45,10 +45,10 @@ KeywordVis.prototype.init = function() {
     cells.append("text")
         .attr("class", "leadChar")
         .attr("x", 5)
-        .attr("y", function(d) { return 17; })
+        .attr("y", function(d) { return 10; })
         .attr("fill", "rgb(20, 150, 250)")
         .attr("fill-opacity","0.6")
-        .attr("font-size", "40px")
+        .attr("font-size", "20px")
         .text(function(d, i) {
             if (i > 0 && isalpha(d.text[0]) && d.text.slice(0, 1) != self.keywordGraph.vertices[i-1].text.slice(0, 1))
                 return d.text.slice(0, 1).toUpperCase();
@@ -57,10 +57,10 @@ KeywordVis.prototype.init = function() {
 
     cells.append("text")
         .attr("class", "keyword")
-        .attr("x", 5)
-        .attr("y", function(d) { return 17; })
+        .attr("x", 3)
+        .attr("y", function(d) { return 10; })
         .attr("fill", "rgb(20, 20, 20)")
-        .attr("font-size", function(d, i) { return "14px"; })
+        .attr("font-size", function(d, i) { return "10px"; })
         .text(function(d) { return d.text; });
 }
 
@@ -125,6 +125,13 @@ KeywordVis.prototype.update = function() {
             } else if (neighbor_keywords.indexOf(i) > -1) {
                 return "rgb(250, 80, 80)";
             }
+
+            else if (selected_keywords.length > 0) {
+                if (selected_keywords.indexOf(i) > -1)
+                    return "rgb(20, 20, 20)";
+                return "rgb(120, 120, 120)";
+            }
+
             return "rgb(20, 20, 20)";
         });
 
