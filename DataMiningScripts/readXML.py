@@ -71,6 +71,7 @@ print ('Reading TXT files')
 for dir in next(os.walk(work_dir))[1]:
     print ('------------' + dir + ' -----------')
     for file in next(os.walk(work_dir + '/' + dir))[2]:
+        title = ""
         if file[-10:] == 'header.txt':
             found_paper = None
             with open(work_dir + '/' + dir + '/' + file, 'r') as f:
@@ -154,8 +155,12 @@ for dir in next(os.walk(work_dir))[1]:
                     keywords_from_paper = line[9:].split(',')
                     break
 
-            keywords_from_paper = "".join([c.lower() if c.isalnum() else " " for c in keywords_from_paper])
-            keywords_from_paper = keywords_from_paper.split()
+            temp = ""
+            for s in keywords_from_paper:
+                    temp += normalize_title(s) + " "
+            #keywords_from_paper = "".join([c.lower() if c.isalnum() else " " for c in keywords_from_paper])
+            temp += normalize_title(title.text)
+            keywords_from_paper = temp.split()
 
             # normalize the keywords
             keywords_set = set()
@@ -279,7 +284,7 @@ for (k, l) in sorted(keyword_map.iteritems()):
     e = Neighbors()
     c = Counter(l)
     for (x, n) in c.iteritems():
-        if n > 1:
+        if n > 2:
             e.neighbors.append(keyword_id[x])
     keyword_graph.edges.append(e)
 

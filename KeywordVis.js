@@ -13,15 +13,15 @@ mouseover_item = -1;
 neighbor_keywords = [];
 selected_keywords = [];
 search_text = ""
-num_rows = 29;
+num_rows = 33;
 
 var isalpha = function(c) { return 'a' <= c && c <= 'z'; };
 
 KeywordVis.prototype.init = function() {
-    var border_x = 25;
-    var border_y = 25;
+    var border_x = 10;
+    var border_y = 10;
     var text_width = 50;
-    var text_height = 25;
+    var text_height = 23;
 
     var cells = this.svg
         .append("g")
@@ -134,17 +134,36 @@ KeywordVis.prototype.update = function() {
     });
     text.on("click", function(d, i) {
         var index = selected_keywords.indexOf(i);
-        console.log(self.keywordGraph.vertices[i].text);
         if (index === -1) { // click on new keyword
             selected_keywords.push(i);
-            neighbor_keywords = neighbor_keywords.concat(self.keywordGraph.edges[i].neighbors);
+            //neighbor_keywords = neighbor_keywords.concat(self.keywordGraph.edges[i].neighbors);
+
         } else { // click on an already selected keyword
             selected_keywords.splice(index, 1);
-            var neighbor_index = find_subarray(neighbor_keywords, self.keywordGraph.edges[i].neighbors, 0);
-            if (neighbor_index >= 0) {
-                neighbor_keywords.splice(neighbor_index, self.keywordGraph.edges[i].neighbors.length);
-            }
+            //var neighbor_index = find_subarray(neighbor_keywords, self.keywordGraph.edges[i].neighbors, 0);
+            //if (neighbor_index >= 0) {
+            //    neighbor_keywords.splice(neighbor_index, self.keywordGraph.edges[i].neighbors.length);
+            //}
         }
+        if (selected_keywords.length > 0) {
+            neighbor_keywords = self.keywordGraph.edges[selected_keywords[0]].neighbors;
+        } else {
+            neighbor_keywords = [];
+        }
+        for (var i = 1; i < selected_keywords.length; ++i) {
+            neighbor_keywords = neighbor_keywords.filter(function(k) {
+                return self.keywordGraph.edges[selected_keywords[i]].neighbors.indexOf(k) != -1;
+            });
+        }
+
+        updateByKeywords();
+        self.update();
+    });
+
+    var clearBtn = d3.select("#clearKeyword");
+    clearBtn.on("click", function(event) {
+        selected_keywords = [];
+        neighbor_keywords = [];
         updateByKeywords();
         self.update();
     });
