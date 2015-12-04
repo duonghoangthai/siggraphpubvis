@@ -160,6 +160,14 @@ KeywordVis.prototype.update = function() {
         self.update();
     });
 
+    var clearBtn = d3.select("#clearKeyword");
+    clearBtn.on("click", function(event) {
+        selected_keywords = [];
+        neighbor_keywords = [];
+        updateByKeywords();
+        self.update();
+    });
+
     var searchBox = d3.select("#searchKeyword");
     searchBox.on("keyup", function(event) {
         search_text = searchBox[0][0].value;
