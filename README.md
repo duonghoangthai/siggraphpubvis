@@ -48,11 +48,12 @@ interest.
 7. Our project also requires the following libraries:
 <ul>
 	<li>https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js</li>
-	https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js
-	http://d3js.org/queue.v1.min.js
-	https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js
-	https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js
+	<li>https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js</li>
+	<li>http://d3js.org/queue.v1.min.js</li>
+	<li>https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js</li>
+	<li>https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js</li>
 </ul>
+
 #URL to Project Website
 
 #Screencast videos
