@@ -54,6 +54,7 @@ interest.
 	<li>https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js</li>
 </ul>
 
-#URL to Project Website
+#Project Website
+
 
 #Screencast videos
