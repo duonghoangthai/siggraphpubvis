@@ -13,7 +13,7 @@ mouseover_item = -1;
 neighbor_keywords = [];
 selected_keywords = [];
 search_text = ""
-num_rows = 38;
+num_rows = 33;
 
 var isalpha = function(c) { return 'a' <= c && c <= 'z'; };
 

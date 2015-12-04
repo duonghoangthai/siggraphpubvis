@@ -1408,20 +1408,22 @@ function updateByKeywords() {
     citedBy = [];
     searchResult = [];
     maxPaperCitationOnSelected = 0;
-
+    console.log(selected_keywords);
     for (var year = 2002; year < 2016; year++) {
         if (paperData.hasOwnProperty(year.toString())) {
             (function () {
                 var i, j;
                 for (i = 0; i < paperData[year].length; i++) {
-                    var found = false;
-                    for (j = 0; j < keywordData[paperData[year][i].id].keywords.length; j++) {
-                        if (selected_keywords.indexOf(keywordData[paperData[year][i].id].keywords[j]) > -1) {
-                            found = true;
+                    var found = true;
+                    for (j = 0; j < selected_keywords.length; ++j) {
+                        if (keywordData[paperData[year][i].id].keywords.indexOf(selected_keywords[j]) < 0) {
+                            found = false;
+                            break;
                         }
                     }
 
                     if (found) {
+                        console.log(keywordData[paperData[year][i].id].keywords);
                         searchResult.push(paperData[year][i]);
                         maxPaperCitationOnSelected = Math.max(getCitedCount(paperData[year][i]), maxPaperCitationOnSelected);
                         paperData[year][i]['isTarget'] = true;
