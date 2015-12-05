@@ -6,31 +6,22 @@ When surveying a new field, researchers often want an overview look at the impor
 papers in the field, how they are related, and how popular trends in topics or techniques
 have been evolving over the years. Traditional search engines such as Google Scholar and
 digital libraries such as the ACM's can alleviate the task, but only when the researcher has
-a good idea of what he should look for. Even then, the information obtained from those
-tools at any given moment is not only too specific but also presented in a non-visual form,
-making it dicult for the user to see a bigger picture.
+a good idea of what he should look for. Furthermore, the manual process of parsing the reference list manually and entering search terms into search engines is very tedious. Even when sufficient data is obtained from such search engines, the data is in a non-visual form and not summarized in any ways, making it difficult for the user to see a high-level picture.
 
 Being both interested in doing research in computer graphics, in this project we aim
 to develop a tool to visualize connections between papers published over the years in SIG-
-GRAPH, the most important conference in computer graphics. The tool should show in
+GRAPH, the most important conference in computer graphics. The tool shows in
 one place: the citation relationships among SIGGRAPH papers, important papers in each
 sub-field, prolific authors and their collaboration patterns, popular topics and methods in
-recent years, and active research institutions in each sub-field. It is our hope that such
-a tool can be particularly helpful to someone who wants to survey a eld and summarize
-major results. It could also help new researchers in finding not only interesting problems to
-work on but also pointers to relevant publications for reference. Lastly, prospective graduate
-students can use information provided by the tool to make more informed decision in their
-application process.
+recent years. It is our hope that this tool can be particularly helpful to someone who wants to survey a field and summarize major results. It could also help new researchers in finding not only interesting problems to work on but also pointers to relevant publications for reference.
 
 #Project Objectives
 Our project aims to answer the following questions:
 
-1. What papers are in uential in the field, in terms of citation count? 
+1. What papers are influential in the field, in terms of citation count?
 2. Given a paper of interest, what papers does it cite? What are the papers citing it?
 3. What topics and techniques are popular, and in which time periods?
-4. Given a set of keywords, what are the most relevant papers/authors/institutions to these keywords?
-5. Who does each author collaborate with the most?
-6. What institutions are more active in a give field, in terms of publication count?
+4. Given a set of keywords, what are the most relevant papers/authors to these keywords?
 
 Answering the above questions will put a make a researcher more informed about what
 papers/authors/topics/techniques to pay more attention to, thereby saving time in the be-
@@ -39,7 +30,8 @@ can help him or her better decide on future research directions for a particular
 interest.
 
 # Files
-1. ./Data stores all our data
+0. Our raw data (as crawled from the internet) is stored in https://www.dropbox.com/sh/5k3jrd89fc6i05u/AAAkmbiOZpe_HHkTjYJVi3qza?dl=0
+1. ./Data stores all our processed data in the form of JSON files
 2. ./DataMiningScripts stores all our scripts, which are used to extract and process data
 3. ./sigvis.html is our main html file
 4. ./processbook.html is our prcess book html
