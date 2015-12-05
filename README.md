@@ -37,7 +37,8 @@ interest.
 4. ./processbook.html is our prcess book html
 5. ./scripts.js and ./KeywordVis.js are our main javascript files
 6. ./fisheye.js and ./virtualscoller.js are external library we required
-7. Our project also requires the following libraries:
+7. ./NewProcessBook/processbook.pdf is our final process book
+8. Our project also requires the following libraries:
 <ul>
 	<li>https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js</li>
 	<li>https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js</li>
