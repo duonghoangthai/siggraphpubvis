@@ -316,11 +316,13 @@ function updateYearBar() {
                         var span10 = "<span style=\"padding-left:10px\"></span>";
 
                         var authorsList = "";
-                        for (var i = 0; i < getAuthors(d).length; i++) {
+                        for (var i = 0; i < getAuthors(d).length-1; i++) {
                             authorsList += d.authors[i] + span10;
                             if ((i+1)%3 == 0)
                                 authorsList += '<br/>';
                         }
+                        authorsList += d.authors[i] + '<br/>';
+
 
                         var colorText;
                         if (searchResult) {
@@ -335,8 +337,11 @@ function updateYearBar() {
                             colorText = 'Black'
                         }
 
-                        div	.html( "<p style=\"font-size:15px; color:" + colorText + "\">" + (d.title) +
-                            "<\p> <p style=\"font-size:10px; color:" + colorText + "\">" +authorsList + "<\p>")
+                        div	.html(
+                            "<a style=\"font-size:10px; color:" + colorText + "\">" + d.year +
+                            "</a> <br/> <a style=\"font-size:15px; color:" + colorText + "\">" + (d.title) +
+                            "</a> <br/> <a style=\"font-size:8px; color:" + colorText + "\">" + authorsList +
+                            "</a>")
                             .style("left", (d3.event.pageX) + "px")
                             .style("top", (d3.event.pageY - 28) + "px")
                             .style("background", 'LightGrey')
@@ -932,31 +937,32 @@ function updateSubPaperView() {
         .radius(100)
         .distortion(10);
 
-    d3.select("#pSubView")
-        .on("mousemove", function() {
-            fisheye.focus(d3.mouse(this));
-            d3.selectAll(".subTitle")
-                    .each(function(d) {})
-                    .attr("transform", function () {
-                        var pos = {
-                            x:d3.transform(this.getAttribute("transform")).translate[0]+22.5,
-                            y:d3.transform(this.getAttribute("transform")).translate[1]
-                        };
-                        var fEye = fisheye(pos);
-                        return "translate("+ (pos.x-22.5) +","+ pos.y
-                            +")"+"scale(" + fEye.z+","+ fEye.z+")"
-                            ;
-                    })
-                ;
-        });
-
     // Draw axis
     var xAxisWidth = 1240;
     var length = 0;
 
     var baseSvg = d3.select("#pSubView").append("svg")
+        .attr('id',"pSubSubView")
         .attr("width", xAxisWidth)
         .attr("height", subTitleBegin+50);
+
+    d3.select("#pSubSubView")
+        .on("mousemove", function() {
+            fisheye.focus(d3.mouse(this));
+            d3.selectAll(".subTitle")
+                .each(function(d) {})
+                .attr("transform", function () {
+                    var pos = {
+                        x:d3.transform(this.getAttribute("transform")).translate[0],
+                        y:d3.transform(this.getAttribute("transform")).translate[1]
+                    };
+                    var fEye = fisheye(pos);
+                    return "translate("+ (pos.x) +","+ pos.y
+                        +")"+"scale(" + fEye.z+","+ fEye.z+")"
+                        ;
+                })
+            ;
+        });
 
     var subSvgGroup = baseSvg.append("g");
 
