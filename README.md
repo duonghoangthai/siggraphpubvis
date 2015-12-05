@@ -50,5 +50,13 @@ interest.
 #Project Website
 http://www.cs.utah.edu/~kwu/vis/sigvis.html
 
+**Note**
+- The recommended screen resolution to view the project is 2560 x 1600 pixels. If your screen has a different resolution than this, you may have to zoom in/out the get a more pleasant view.
+- The main view (paper view) can be zoomed in using the middle mouse button, and dragged to pan using the left mouse button. When panning, try not to click on a paper's title because that will select the paper in addition to panning the view.
+- The paper detail view will show the abstract (and other details) of the currently selected paper in the paper view. Initially this view will be empty as no paper is selected.
+- The author view only shows authors of the currently selected paper. In the beginning it will be empty as no paper is selected.
+- Almost any visual element in our views is clickable.
+- When a keyword is selected, it will have a cyan background, and the related keywords (the ones that appear together with the selected one) will be highlighted in bright red/orange. Multiple keywords can be selected, in which case the intersection of their sets of related keywords will be highlighted. Selecting keywords will highlight corresponding papers in the paper view.
+
 #Screencast videos
 https://www.youtube.com/watch?v=NDE5lXoJ8Jk
