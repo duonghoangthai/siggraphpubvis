@@ -50,7 +50,7 @@ interest.
 #Project Website
 http://www.cs.utah.edu/~kwu/vis/sigvis.html
 
-**Note**
+**Notes**
 - The recommended screen resolution to view the project is 2560 x 1600 pixels. If your screen has a different resolution than this, you may have to zoom in/out the get a more pleasant view.
 - The main view (paper view) can be zoomed in using the middle mouse button, and dragged to pan using the left mouse button. When panning, try not to click on a paper's title because that will select the paper in addition to panning the view.
 - The paper detail view will show the abstract (and other details) of the currently selected paper in the paper view. Initially this view will be empty as no paper is selected.
