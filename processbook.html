@@ -420,7 +420,9 @@
                 <p style="text-align: center;"><img alt="" src="./img/author_view_with_tooltip.png" width='700' height='300'/></p>
 
                 <h4 style="text-align: left;">Keyword View</h4>
-                <p></p>
+                <p>In this view we display all the keywords extracted from our paper database. Since the number of keywords are large (we have nearly a thousand keywords), we opted for a simple view where the keywords are sorted in alphabetical order and shown in a grid. Some keywords are long and will thus be truncated in the view, but will be shown in full when the user moves the mouse over. We achieved this by fading out the two adjacent keywords. The list of keywords can be filtered using a search box (irrelevant keywords will be grayed out). Keywords are clickable. When a keyword is clicked on, it will be highlighted, together with all its related keywords. Two keywords are related if they appear together in more than one papers</p>
+                <p style="text-align: center;"><img alt="" src="./img/keyword_view_selected.png" width='700' height='300'/></p>
+                <p>Selecting a set of keywords will have an effect on the paper view. Papers having all the selected keywords will be highlighted. This is very useful for exploration of the paper database based on keywords.</p>
             </div>
         </div>
     </div>
@@ -432,7 +434,33 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2">
                 <h2 style="text-align: left;">Evaluation</h2>
+                <p>In this section, we demonstrate a typical usage scenario of our tool. Let's say the user is interested in all papers that address the problem of "global illumination". This is one of the fundamental, long-standing problems in computer graphics.</p>
+                <p>We start by looking at the keywords and clicking on "global" and "illumination". These keywords can be found by either starting the search at the letter "G" and "I", or by using the search textbox. Once these two keywords are clicked on, other related keywords are also highlighted</p>
+                <p style="text-align: center;"><img alt="" src="./img/global_illumination_clicked.png" width='600' height='350'/></p>
 
+                <p>In the paper view, papers with both the keywords are highlighted.</p>
+                <p style="text-align: center;"><img alt="" src="./img/global_illumination_papers.png" width='700' height='250'/></p>
+
+                <p>There are two highlighted papers in 2015, one of them having significantly more citations than the other. Since we are interested in the state-of-the-art research, we click on the one in 2015 with more citations. This paper is called "Gradient domain path tracing".</p>
+                <p style="text-align: center;"><img alt="" src="./img/gradient_domain_path_tracing.png" width='600' height='300'/></p>
+
+                <p>In the paper detail view, we can read the selected paper's abstract, as well as see a list of keywords associated with this paper.</p>
+                <p style="text-align: center;"><img alt="" src="./img/gradient_domain_path_tracing_detail.png" width='700' height='200'/></p>
+
+                <p>After reading the abstract and having a look at the keywords, we are interested in the keyword "path tracing", which is a technique to achieve global illumination. Clicking on these two words ("path" and "tracing") in the paper detail view bring us to the keyword view where these two keywords are selected (in addition to "global" and "illumination" which were selected before). Going back to the paper view, which now highlights all the papers with these four keywords. Looking at the recent years we notice there are two highlighted papers, one of which is the one that we have already seen.</p>
+                <p style="text-align: center;"><img alt="" src="./img/global_illumination_path_tracing_papers.png" width='400' height='300'/></p>
+
+                <p>We click on the the other paper which is titled "Unifying points, beams, and paths in volumetric light transport simulation". After going to the paper detail view to read its abstract, we are interested in this paper and want to find papers that are related to it. We go back to the paper view and see that this paper references another paper in the same year, with a title that seems like it could be of interest to us: "Multiplexed metropolis light transport".</p>
+                <p style="text-align: center;"><img alt="" src="./img/multiplexed_metropolis_light_trasnport_referenced.png" width='700' height='200'/></p>
+
+                <p>Clicking on the paper "Multiplexed metropolis light transport", we can read its abstract and furthermore look at its authors. We notice that one of its authors, Carsten Dachsbacher, has written a paper in SIGGRAPH 2007 about a method that addresses the problem of "interactive global illumination" (the paper's title is "Implicit visibility and antiradiance for interactive global illumination"). We are interested in knowing more about this paper because unlike path tracing, which is a general but very slow solution to the problem of global illumination, this paper seems to propose a method that can compute global illumination at interactive rates.</p>
+                <p style="text-align: center;"><img alt="" src="./img/carsten_dachsbacher.png" width='700' height='350'/></p>
+
+                <p>We then click on the paper "Implicit visibility and antiradiance for interactive global illumination" in the author view to select it. Back to the paper detail view we can read this paper's abstract and look at the list of papers that it references. And from this we can continue our exploration of the space of papers that try to solve the global illumination problem in one way or another.</p>
+                <p style="text-align: center;"><img alt="" src="./img/antiradiance_paper_detail.png" width='700' height='350'/></p>
+
+                <h2 style="text-align: left;">Conclusion</h2>
+                <p>We have shown that our tool provides several ways to navigate the space of papers that are related to certain topics of interest. One can use either the reference relationships, the common keyword relationships, or the common author relationships to get to the papers of interest and read their abstract to understand them more. On our way of exploring the data, we also  learn more about the various techniques employed and get an idea about who publish frequently in this topic. All of these can work together to help the user quickly get a high-level understanding of the field of research he or she is interested in.</p>
             </div>
         </div>
     </div>
