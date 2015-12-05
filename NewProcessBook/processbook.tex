@@ -1,0 +1,62 @@
+\documentclass[12pt]{article}
+
+% Any percent sign marks a comment to the end of the line
+
+% Every latex document starts with a documentclass declaration like this
+% The option dvips allows for graphics, 12pt is the font size, and article
+%   is the style
+
+\usepackage[pdftex]{graphicx}
+\usepackage{url}
+\usepackage[pdftex]{hyperref}
+\usepackage{listings}
+
+% These are additional packages for "pdflatex", graphics, and to include
+% hyperlinks inside a document.
+
+\setlength{\oddsidemargin}{0.25in}
+\setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{0in}
+\setlength{\textheight}{8.5in}
+
+% These force using more of the margins that is the default style
+
+\begin{document}
+
+% Everything after this becomes content
+% Replace the text between curly brackets with your own
+
+\title{CS 6630 Project Process Book\\Visualizing SIGGRAPH Publications}
+\author{Kui Wu and Duong Hoang\\u0931640 and u0930062\\u0931640@utah.edu and u0933062@utah.edu}
+\date{\today}
+
+% You can leave out "date" and it will be added automatically for today
+% You can change the "\today" date to any text you like
+
+\maketitle
+
+\section{Overview}
+\input{overview}
+
+\section{Related Work}
+\input{relatedwork}
+
+\section{Questions}
+\input{questions}
+
+\section{Data}
+\input{data}
+
+\section{Exploratory Data Analysis}
+\input{eda}
+
+\section{Design Evolution}
+\input{dEvolution} 
+
+\section{Implementation}
+\input{implementation}
+
+\section{Evaluation}
+\input{evaluation}
+
+\end{document}
